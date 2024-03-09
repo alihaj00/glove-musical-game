@@ -35,6 +35,13 @@ class MainPage extends StatelessWidget {
               },
               child: Text('Register'),
             ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/BT connection');
+              },
+              child: Text('BT connection'),
+            ),
           ],
         ),
       ),

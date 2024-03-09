@@ -3,6 +3,9 @@ import 'main_page.dart';
 import 'login_page.dart';
 import 'registration_page.dart';
 import 'songs_page.dart';
+import 'ble_handler.dart';
+import 'main_menu.dart';
+import 'statistics_page.dart';
 
 void main() {
   runApp(MyApp());
@@ -21,7 +24,10 @@ class MyApp extends StatelessWidget {
         '/': (context) => MainPage(),
         '/login': (context) => LoginPage(),
         '/register': (context) => RegistrationPage(),
+        '/main menu': (context) => MainMenuPage(),
         '/songs': (context) => SongsPage(),
+        '/statistics': (context) => StatisticsPage(),
+        '/BT connection': (context) => BluetoothDeviceListScreen(),
       },
     );
   }

@@ -52,7 +52,7 @@ class _LoginPageState extends State<LoginPage> {
             ElevatedButton(
               onPressed: () {
                 if (_validateInputs(username, password)) {
-                  Navigator.pushNamed(context, '/songs');
+                  Navigator.pushNamed(context, '/main menu');
                 } else {
                   setState(() {
                     hasError = true;

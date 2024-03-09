@@ -52,7 +52,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
             ElevatedButton(
               onPressed: () {
                 if (_validateInputs(username, password)) {
-                  Navigator.pushNamed(context, '/songs');
+                  Navigator.pushNamed(context, '/main menu');
                 } else {
                   setState(() {
                     hasError = true;
