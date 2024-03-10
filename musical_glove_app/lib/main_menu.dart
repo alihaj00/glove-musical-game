@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'songs_page.dart';
-import 'statistics_page.dart';
 
 class MainMenuPage extends StatelessWidget {
   @override
@@ -8,6 +6,8 @@ class MainMenuPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Main Menu'),
+        backgroundColor: Color(0xFF073050),
+        foregroundColor: Colors.white,
       ),
       body: Center(
         child: Column(

@@ -16,6 +16,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Registration'),
+        backgroundColor: Color(0xFF073050),
+        foregroundColor: Colors.white,
       ),
       body: Center(
         child: Column(

@@ -38,6 +38,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Statistics'),
+        backgroundColor: Color(0xFF073050),
+        foregroundColor: Colors.white,
       ),
       body: Center(
         child: isLoading

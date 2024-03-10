@@ -6,6 +6,8 @@ class SongsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Songs'),
+        backgroundColor: Color(0xFF073050),
+        foregroundColor: Colors.white,
       ),
       body: Center(
         child: Column(
