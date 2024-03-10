@@ -16,6 +16,7 @@ class _BluetoothDeviceListScreenState
   bool isSending = false;
   String responseMessage = '';
   bool isScanning = false;
+  List<BluetoothDevice> devicesList = [];
 
   @override
   void initState() {
@@ -25,6 +26,7 @@ class _BluetoothDeviceListScreenState
   Future<void> _scanForDevices() async {
     esp32Device = null;
     isScanning = true;
+    devicesList.clear(); // Clear the list of discovered devices
     setState(() {});
 
     flutterBlue.startScan(timeout: Duration(seconds: 4));
@@ -37,12 +39,18 @@ class _BluetoothDeviceListScreenState
             isScanning = false;
           });
           break;
+        } else {
+          if (!devicesList.contains(r.device)) {
+            setState(() {
+              devicesList.add(r.device);
+            });
+          }
         }
       }
     });
 
-    // Stop scanning after 4 seconds
-    await Future.delayed(Duration(seconds: 4));
+    // Stop scanning after 10 seconds
+    await Future.delayed(Duration(seconds: 10));
     flutterBlue.stopScan();
     if (esp32Device == null) {
       setState(() {
@@ -144,6 +152,33 @@ class _BluetoothDeviceListScreenState
                   ),
                 if (responseMessage.isNotEmpty)
                   Text('Response: $responseMessage'),
+              ],
+            ),
+          if (devicesList.isNotEmpty)
+            Column(
+              children: [
+                Text(
+                  'Other available devices:',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+                SizedBox(height: 10),
+                ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: devicesList.length,
+                  itemBuilder: (context, index) {
+                    String deviceName = devicesList[index].name.isEmpty ? 'Unknown device' : devicesList[index].name;
+                    return ListTile(
+                      title: Text(deviceName),
+                      subtitle: Text(devicesList[index].id.toString()),
+                      onTap: () {
+                        _connectToDevice(devicesList[index]);
+                      },
+                    );
+                  },
+                ),
               ],
             ),
         ],
