@@ -8,7 +8,7 @@ class StatisticsPage extends StatefulWidget {
 }
 
 class _StatisticsPageState extends State<StatisticsPage> {
-  String statisticsData = 'Loading...';
+  var statisticsData = 'Loading...';
   bool isLoading = true;
 
   @override
@@ -54,7 +54,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
       characteristic!.value.listen((value) {
         // Handle response from ESP
         setState(() {
-          statisticsData = utf8.decode(value);
+          statisticsData = value[0].toString();
           isLoading = false;
         });
       });
@@ -81,7 +81,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text(statisticsData),
+                  Text("Latest Score - " + statisticsData),
                   SizedBox(height: 15),
                   TextButton(
                     onPressed: () {
