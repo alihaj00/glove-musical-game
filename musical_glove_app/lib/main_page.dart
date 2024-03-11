@@ -21,7 +21,13 @@ class MainPage extends StatelessWidget {
                 color: Colors.lightBlue[900],
               ),
             ),
-            SizedBox(height: 300),
+            SizedBox(height: 50),
+            Image.asset(
+              'assets/glove_main_page.jpg', // Adjust the path to match your image file
+              width: 350, // Adjust the width as needed
+              height: 350, // Adjust the height as needed
+            ),
+            SizedBox(height: 50),
             ElevatedButton(
               onPressed: () {
                 Navigator.pushNamed(context, '/login');

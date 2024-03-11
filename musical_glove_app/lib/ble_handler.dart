@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'dart:convert';
 
+final FlutterBlue flutterBlue = FlutterBlue.instance;
+BluetoothDevice? esp32Device;
+BluetoothCharacteristic? characteristic;
+bool isSending = false;
+
 class BluetoothDeviceListScreen extends StatefulWidget {
   @override
   _BluetoothDeviceListScreenState createState() =>
@@ -10,10 +15,7 @@ class BluetoothDeviceListScreen extends StatefulWidget {
 
 class _BluetoothDeviceListScreenState
     extends State<BluetoothDeviceListScreen> {
-  final FlutterBlue flutterBlue = FlutterBlue.instance;
-  BluetoothDevice? esp32Device;
-  BluetoothCharacteristic? characteristic;
-  bool isSending = false;
+
   String responseMessage = '';
   bool isScanning = false;
   List<BluetoothDevice> devicesList = [];
@@ -33,7 +35,7 @@ class _BluetoothDeviceListScreenState
 
     flutterBlue.scanResults.listen((results) {
       for (ScanResult r in results) {
-        if (r.device.name == 'ESP32_BT') {
+        if (r.device.name == 'ESP32') {
           setState(() {
             esp32Device = r.device;
             isScanning = false;
@@ -64,12 +66,17 @@ class _BluetoothDeviceListScreenState
       await device.connect();
       List<BluetoothService> services = await device.discoverServices();
       services.forEach((service) {
-        service.characteristics.forEach((characteristic) {
-          if (characteristic.properties.write) {
-            this.characteristic = characteristic;
+        service.characteristics.forEach((characteristics) {
+          if (characteristics.properties.write) {
+            characteristic = characteristics;
           }
         });
       });
+      characteristic?.setNotifyValue(true);
+      var stream = characteristic?.value.listen((event) {
+          print(event[0]);
+        }
+      );
     } catch (e) {
       print('Failed to connect to the device: $e');
     }

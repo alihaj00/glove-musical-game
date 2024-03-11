@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-// import 'bt_handler.dart'; // Import your BT handler here
+import 'dart:convert';
+import 'ble_handler.dart';
 
 class StatisticsPage extends StatefulWidget {
   @override
@@ -13,24 +14,57 @@ class _StatisticsPageState extends State<StatisticsPage> {
   @override
   void initState() {
     super.initState();
-    // Retrieve statistics data from BT handler
     retrieveStatisticsData();
   }
 
-  void retrieveStatisticsData() {
-    // Replace this with your BT handler logic to retrieve statistics
-    // For demonstration purposes, we're just showing 'Loading...'
-    setState(() {
-      isLoading = true;
-    });
+  Future<void> _sendRequest(String request) async {
+    if (characteristic != null) {
+      try {
+        setState(() {
+          isSending = true;
+        });
+        await characteristic!.write(utf8.encode(request), withoutResponse: true);
+        // Wait for a response
+        await Future.delayed(Duration(seconds: 2));
+        String response = utf8.decode(await characteristic!.read());
+        setState(() {
+          // responseMessage = response;
+        });
+      } catch (e) {
+        print('Failed to send the song: $e');
+      } finally {
+        setState(() {
+          isSending = false;
+        });
+      }
+    }
+  }
 
-    // Simulate loading statistics data from BT handler
-    Future.delayed(Duration(seconds: 2), () {
+  void retrieveStatisticsData() async {
+    try {
       setState(() {
-        statisticsData = 'Statistics data retrieved successfully!';
+        isLoading = true;
+      });
+
+      // Send request to ESP to retrieve statistics
+      await _sendRequest('get_statistics');
+
+      // Listen to responses from ESP device
+      characteristic!.setNotifyValue(true);
+      characteristic!.value.listen((value) {
+        // Handle response from ESP
+        setState(() {
+          statisticsData = utf8.decode(value);
+          isLoading = false;
+        });
+      });
+    } catch (e) {
+      print('Failed to retrieve statistics data: $e');
+      setState(() {
+        statisticsData = 'Failed to retrieve statistics data';
         isLoading = false;
       });
-    });
+    }
   }
 
   @override
@@ -43,18 +77,18 @@ class _StatisticsPageState extends State<StatisticsPage> {
       ),
       body: Center(
         child: isLoading
-            ? CircularProgressIndicator() // Show spinner if loading
+            ? CircularProgressIndicator()
             : Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(statisticsData),
-            SizedBox(height: 15),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('Back'),
-            ),
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(statisticsData),
+                  SizedBox(height: 15),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text('Back'),
+                  ),
           ],
         ),
       ),

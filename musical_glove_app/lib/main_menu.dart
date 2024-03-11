@@ -1,6 +1,24 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'ble_handler.dart';
 
 class MainMenuPage extends StatelessWidget {
+
+  Future<void> _sendRequest(String request) async {
+    if (characteristic != null) {
+      try {
+        await characteristic!.write(utf8.encode(request), withoutResponse: true);
+        // Wait for a response
+        await Future.delayed(Duration(seconds: 2));
+        String response = utf8.decode(await characteristic!.read());
+      } catch (e) {
+        print('Failed to send the song: $e');
+      } finally {
+          isSending = false;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,6 +36,13 @@ class MainMenuPage extends StatelessWidget {
                 Navigator.pushNamed(context, '/songs');
               },
               child: Text('Songs'),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                _sendRequest('P-reference');
+              },
+              child: Text('Free Trial'),
             ),
             SizedBox(height: 20),
             ElevatedButton(
