@@ -2,22 +2,12 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'ble_handler.dart';
 
-class MainMenuPage extends StatelessWidget {
+class MainMenuPage extends StatefulWidget {
+  @override
+  _MainMenuPageState createState() => _MainMenuPageState();
+}
 
-  Future<void> _sendRequest(String request) async {
-    if (characteristic != null) {
-      try {
-        await characteristic!.write(utf8.encode(request), withoutResponse: true);
-        // Wait for a response
-        await Future.delayed(Duration(seconds: 2));
-        String response = utf8.decode(await characteristic!.read());
-      } catch (e) {
-        print('Failed to send the song: $e');
-      } finally {
-          isSending = false;
-      }
-    }
-  }
+class _MainMenuPageState extends State<MainMenuPage> {
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +30,7 @@ class MainMenuPage extends StatelessWidget {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                _sendRequest('P-reference');
+                BluetoothHandler.sendRequest('P-reference', () => setState(() {}));
               },
               child: Text('Free Trial'),
             ),

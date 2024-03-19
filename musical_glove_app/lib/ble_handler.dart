@@ -1,11 +1,92 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'dart:convert';
-
-final FlutterBlue flutterBlue = FlutterBlue.instance;
+import 'dart:async';
 BluetoothDevice? esp32Device;
 BluetoothCharacteristic? characteristic;
 bool isSending = false;
+String responseMessage = ''; // Static variable for response message
+Function? setStateCallback;
+
+class BluetoothHandler {
+  static Future<void> connectToDevice(
+      BluetoothDevice device, Function setState) async {
+    try {
+      await device.connect();
+      List<BluetoothService> services = await device.discoverServices();
+      services.forEach((service) {
+        service.characteristics.forEach((characteristics) {
+          if (characteristics.properties.write) {
+            characteristic = characteristics;
+          }
+        });
+      });
+      characteristic?.setNotifyValue(true);
+      setState();
+    } catch (e) {
+      print('Failed to connect to the device: $e');
+    }
+  }
+
+  static Future<void> sendHello(Function setState) async {
+    if (characteristic != null) {
+      try {
+        isSending = true;
+        await characteristic!
+            .write(utf8.encode('hello'), withoutResponse: true);
+        // Wait for a response
+        await Future.delayed(Duration(seconds: 2));
+        String response = utf8.decode(await characteristic!.read());
+        print(response);
+        setState();
+      } catch (e) {
+        print('Failed to send hello: $e');
+      } finally {
+        isSending = false;
+      }
+    }
+  }
+
+  static Future<void> sendSongToESP(
+      String selectedSong, String action, Function setState) async {
+    if (characteristic != null) {
+      try {
+        isSending = true;
+        await characteristic!
+            .write(utf8.encode(selectedSong + "_" + action), withoutResponse: true);
+        // Wait for a response
+        await Future.delayed(Duration(seconds: 2));
+        String response = utf8.decode(await characteristic!.read());
+        print(response);
+      } catch (e) {
+        print('Failed to send the song: $e');
+      } finally {
+        isSending = false;
+        setState();
+      }
+    }
+  }
+
+  static Future<void> sendRequest(
+      String request, Function setState) async {
+    if (characteristic != null) {
+      try {
+        isSending = true;
+        await characteristic!
+            .write(utf8.encode(request), withoutResponse: true);
+        // Wait for a response
+        await Future.delayed(Duration(seconds: 2));
+        String response = utf8.decode(await characteristic!.read());
+        print(response);
+        setState();
+      } catch (e) {
+        print('Failed to send the request: $e');
+      } finally {
+        isSending = false;
+      }
+    }
+  }
+}
 
 class BluetoothDeviceListScreen extends StatefulWidget {
   @override
@@ -15,7 +96,6 @@ class BluetoothDeviceListScreen extends StatefulWidget {
 
 class _BluetoothDeviceListScreenState
     extends State<BluetoothDeviceListScreen> {
-
   String responseMessage = '';
   bool isScanning = false;
   List<BluetoothDevice> devicesList = [];
@@ -30,6 +110,8 @@ class _BluetoothDeviceListScreenState
     isScanning = true;
     devicesList.clear(); // Clear the list of discovered devices
     setState(() {});
+
+    FlutterBlue flutterBlue = FlutterBlue.instance;
 
     flutterBlue.startScan(timeout: Duration(seconds: 4));
 
@@ -58,50 +140,6 @@ class _BluetoothDeviceListScreenState
       setState(() {
         isScanning = false;
       });
-    }
-  }
-
-  Future<void> _connectToDevice(BluetoothDevice device) async {
-    try {
-      await device.connect();
-      List<BluetoothService> services = await device.discoverServices();
-      services.forEach((service) {
-        service.characteristics.forEach((characteristics) {
-          if (characteristics.properties.write) {
-            characteristic = characteristics;
-          }
-        });
-      });
-      characteristic?.setNotifyValue(true);
-      var stream = characteristic?.value.listen((event) {
-          print(event[0]);
-        }
-      );
-    } catch (e) {
-      print('Failed to connect to the device: $e');
-    }
-  }
-
-  Future<void> _sendHello() async {
-    if (characteristic != null) {
-      try {
-        setState(() {
-          isSending = true;
-        });
-        await characteristic!.write(utf8.encode('hello'), withoutResponse: true);
-        // Wait for a response
-        await Future.delayed(Duration(seconds: 2));
-        String response = utf8.decode(await characteristic!.read());
-        setState(() {
-          responseMessage = response;
-        });
-      } catch (e) {
-        print('Failed to send hello: $e');
-      } finally {
-        setState(() {
-          isSending = false;
-        });
-      }
     }
   }
 
@@ -149,16 +187,19 @@ class _BluetoothDeviceListScreenState
                     },
                   ),
                   onTap: () {
-                    _connectToDevice(esp32Device!);
+                    BluetoothHandler.connectToDevice(
+                        esp32Device!, () => setState(() {}));
                   },
                 ),
                 if (characteristic != null)
                   ElevatedButton(
-                    onPressed: isSending ? null : _sendHello,
+                    onPressed: isSending
+                        ? null
+                        : () => BluetoothHandler.sendHello(() => setState(() {})),
                     child: Text('Send Hello'),
                   ),
                 if (responseMessage.isNotEmpty)
-                  Text('Response: $responseMessage'),
+                  Text('Response: ${responseMessage}'),
               ],
             ),
           if (devicesList.isNotEmpty)
@@ -176,12 +217,15 @@ class _BluetoothDeviceListScreenState
                   shrinkWrap: true,
                   itemCount: devicesList.length,
                   itemBuilder: (context, index) {
-                    String deviceName = devicesList[index].name.isEmpty ? 'Unknown device' : devicesList[index].name;
+                    String deviceName = devicesList[index].name.isEmpty
+                        ? 'Unknown device'
+                        : devicesList[index].name!;
                     return ListTile(
                       title: Text(deviceName),
                       subtitle: Text(devicesList[index].id.toString()),
                       onTap: () {
-                        _connectToDevice(devicesList[index]);
+                        BluetoothHandler.connectToDevice(devicesList[index],
+                                () => setState(() {}));
                       },
                     );
                   },

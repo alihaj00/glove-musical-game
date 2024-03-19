@@ -10,29 +10,6 @@ class SongsPage extends StatefulWidget {
 class _SongsPageState extends State<SongsPage> {
   String selectedSong = '';
 
-  Future<void> _sendSongToESP(String selectedSong, String action) async {
-    if (characteristic != null) {
-      try {
-        setState(() {
-          isSending = true;
-        });
-        await characteristic!.write(utf8.encode(selectedSong + "_" + action), withoutResponse: true);
-        // Wait for a response
-        await Future.delayed(Duration(seconds: 2));
-        String response = utf8.decode(await characteristic!.read());
-        setState(() {
-          // responseMessage = response;
-        });
-      } catch (e) {
-        print('Failed to send the song: $e');
-      } finally {
-        setState(() {
-          isSending = false;
-        });
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,7 +24,7 @@ class _SongsPageState extends State<SongsPage> {
           children: <Widget>[
             RadioListTile(
               title: Text('Song 1'),
-              value: 'Song1',
+              value: 'song1',
               groupValue: selectedSong,
               onChanged: (value) {
                 setState(() {
@@ -57,7 +34,7 @@ class _SongsPageState extends State<SongsPage> {
             ),
             RadioListTile(
               title: Text('Song 2'),
-              value: 'Song2',
+              value: 'song2',
               groupValue: selectedSong,
               onChanged: (value) {
                 setState(() {
@@ -67,7 +44,7 @@ class _SongsPageState extends State<SongsPage> {
             ),
             RadioListTile(
               title: Text('Song 3'),
-              value: 'Song3',
+              value: 'song3',
               groupValue: selectedSong,
               onChanged: (value) {
                 setState(() {
@@ -79,7 +56,7 @@ class _SongsPageState extends State<SongsPage> {
               onPressed: () {
                 if (selectedSong.isNotEmpty) {
                   // Send the selected song to the ESP
-                  _sendSongToESP(selectedSong, 'hear');
+                  BluetoothHandler.sendSongToESP(selectedSong, 'hear', () => setState(() {}));
                 } else {
                   // Inform the user to select a song
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -96,7 +73,7 @@ class _SongsPageState extends State<SongsPage> {
               onPressed: () {
                 if (selectedSong.isNotEmpty) {
                   // Send the selected song to the ESP
-                  _sendSongToESP(selectedSong, 'play');
+                  BluetoothHandler.sendSongToESP(selectedSong, 'play', () => setState(() {}));
                 } else {
                   // Inform the user to select a song
                   ScaffoldMessenger.of(context).showSnackBar(
