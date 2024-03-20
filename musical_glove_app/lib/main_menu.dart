@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import 'ble_handler.dart';
 
 class MainMenuPage extends StatefulWidget {
+  const MainMenuPage({super.key});
+
   @override
   _MainMenuPageState createState() => _MainMenuPageState();
 }
@@ -13,8 +14,8 @@ class _MainMenuPageState extends State<MainMenuPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Main Menu'),
-        backgroundColor: Color(0xFF073050),
+        title: const Text('Main Menu'),
+        backgroundColor: const Color(0xFF073050),
         foregroundColor: Colors.white,
       ),
       body: Center(
@@ -25,28 +26,28 @@ class _MainMenuPageState extends State<MainMenuPage> {
               onPressed: () {
                 Navigator.pushNamed(context, '/songs');
               },
-              child: Text('Songs'),
+              child: const Text('Songs'),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 BluetoothHandler.sendRequest('P-reference', () => setState(() {}));
               },
-              child: Text('Free Trial'),
+              child: const Text('Free Trial'),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 Navigator.pushNamed(context, '/statistics');
               },
-              child: Text('Statistics'),
+              child: const Text('Statistics'),
             ),
-            SizedBox(height: 15),
+            const SizedBox(height: 15),
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('Back'),
+              child: const Text('Back'),
             ),
           ],
         ),

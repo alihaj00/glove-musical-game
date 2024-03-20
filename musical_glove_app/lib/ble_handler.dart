@@ -14,13 +14,13 @@ class BluetoothHandler {
     try {
       await device.connect();
       List<BluetoothService> services = await device.discoverServices();
-      services.forEach((service) {
-        service.characteristics.forEach((characteristics) {
+      for (var service in services) {
+        for (var characteristics in service.characteristics) {
           if (characteristics.properties.write) {
             characteristic = characteristics;
           }
-        });
-      });
+        }
+      }
       characteristic?.setNotifyValue(true);
       setState();
     } catch (e) {
@@ -35,7 +35,7 @@ class BluetoothHandler {
         await characteristic!
             .write(utf8.encode('hello'), withoutResponse: true);
         // Wait for a response
-        await Future.delayed(Duration(seconds: 2));
+        await Future.delayed(const Duration(seconds: 2));
         String response = utf8.decode(await characteristic!.read());
         print(response);
         setState();
@@ -53,9 +53,9 @@ class BluetoothHandler {
       try {
         isSending = true;
         await characteristic!
-            .write(utf8.encode(selectedSong + "_" + action), withoutResponse: true);
+            .write(utf8.encode("${selectedSong}_$action"), withoutResponse: true);
         // Wait for a response
-        await Future.delayed(Duration(seconds: 2));
+        await Future.delayed(const Duration(seconds: 2));
         String response = utf8.decode(await characteristic!.read());
         print(response);
       } catch (e) {
@@ -75,7 +75,7 @@ class BluetoothHandler {
         await characteristic!
             .write(utf8.encode(request), withoutResponse: true);
         // Wait for a response
-        await Future.delayed(Duration(seconds: 2));
+        await Future.delayed(const Duration(seconds: 2));
         String response = utf8.decode(await characteristic!.read());
         print(response);
         setState();
@@ -86,9 +86,40 @@ class BluetoothHandler {
       }
     }
   }
+
+  static Future<String> sendUsernameAndPassword(String action,
+      String username, String password) async {
+    if (characteristic != null) {
+      try {
+        isSending = true;
+        // Create a Map to organize data
+        Map<String, dynamic> requestData = {
+          'action': action,
+          'username': username,
+          'password': password,
+        };
+        // Convert the Map to JSON
+        String jsonData = jsonEncode(requestData);
+        await characteristic!.write(utf8.encode(jsonData), withoutResponse: true);
+        // Wait for a response
+        await Future.delayed(const Duration(seconds: 2));
+        String response = utf8.decode(await characteristic!.read());
+        return response.trim();
+      } catch (e) {
+        print('Failed to send username and password: $e');
+        return ''; // Return empty response on failure
+      } finally {
+        isSending = false;
+      }
+    } else {
+      return ''; // Return empty response if characteristic is null
+    }
+  }
 }
 
 class BluetoothDeviceListScreen extends StatefulWidget {
+  const BluetoothDeviceListScreen({super.key});
+
   @override
   _BluetoothDeviceListScreenState createState() =>
       _BluetoothDeviceListScreenState();
@@ -113,7 +144,7 @@ class _BluetoothDeviceListScreenState
 
     FlutterBlue flutterBlue = FlutterBlue.instance;
 
-    flutterBlue.startScan(timeout: Duration(seconds: 4));
+    flutterBlue.startScan(timeout: const Duration(seconds: 4));
 
     flutterBlue.scanResults.listen((results) {
       for (ScanResult r in results) {
@@ -134,7 +165,7 @@ class _BluetoothDeviceListScreenState
     });
 
     // Stop scanning after 10 seconds
-    await Future.delayed(Duration(seconds: 10));
+    await Future.delayed(const Duration(seconds: 10));
     flutterBlue.stopScan();
     if (esp32Device == null) {
       setState(() {
@@ -147,29 +178,29 @@ class _BluetoothDeviceListScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bluetooth Devices'),
+        title: const Text('Bluetooth Devices'),
       ),
       body: Column(
         children: [
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Center(
             child: ElevatedButton(
               onPressed: _scanForDevices,
-              child: Text('Scan'),
+              child: const Text('Scan'),
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           if (isScanning)
-            CircularProgressIndicator()
+            const CircularProgressIndicator()
           else if (esp32Device == null)
-            Text('The ESP is not found')
+            const Text('The ESP is not found')
           else
             Column(
               children: [
                 ListTile(
                   title: Text(
-                    esp32Device!.name ?? 'Unknown device',
-                    style: TextStyle(
+                    esp32Device!.name,
+                    style: const TextStyle(
                       color: Colors.blue,
                       fontWeight: FontWeight.bold,
                     ),
@@ -180,9 +211,9 @@ class _BluetoothDeviceListScreenState
                     initialData: BluetoothDeviceState.disconnected,
                     builder: (context, snapshot) {
                       if (snapshot.data == BluetoothDeviceState.connected) {
-                        return Icon(Icons.bluetooth_connected, color: Colors.green);
+                        return const Icon(Icons.bluetooth_connected, color: Colors.green);
                       } else {
-                        return Icon(Icons.bluetooth_disabled, color: Colors.red);
+                        return const Icon(Icons.bluetooth_disabled, color: Colors.red);
                       }
                     },
                   ),
@@ -196,30 +227,30 @@ class _BluetoothDeviceListScreenState
                     onPressed: isSending
                         ? null
                         : () => BluetoothHandler.sendHello(() => setState(() {})),
-                    child: Text('Send Hello'),
+                    child: const Text('Send Hello'),
                   ),
                 if (responseMessage.isNotEmpty)
-                  Text('Response: ${responseMessage}'),
+                  Text('Response: $responseMessage'),
               ],
             ),
           if (devicesList.isNotEmpty)
             Column(
               children: [
-                Text(
+                const Text(
                   'Other available devices:',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 ListView.builder(
                   shrinkWrap: true,
                   itemCount: devicesList.length,
                   itemBuilder: (context, index) {
                     String deviceName = devicesList[index].name.isEmpty
                         ? 'Unknown device'
-                        : devicesList[index].name!;
+                        : devicesList[index].name;
                     return ListTile(
                       title: Text(deviceName),
                       subtitle: Text(devicesList[index].id.toString()),

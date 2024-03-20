@@ -6,11 +6,11 @@ class InputFields extends StatefulWidget {
   final bool hasError;
 
   const InputFields({
-    Key? key,
+    super.key,
     required this.hintText,
     required this.onChanged,
     this.hasError = false,
-  }) : super(key: key);
+  });
 
   @override
   _InputFieldsState createState() => _InputFieldsState();
@@ -35,7 +35,7 @@ class _InputFieldsState extends State<InputFields> {
   Widget build(BuildContext context) {
     return Container(
       width: 300,
-      padding: EdgeInsets.all(10),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         border: Border.all(

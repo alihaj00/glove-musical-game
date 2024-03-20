@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
 class MainPage extends StatelessWidget {
+  const MainPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('🎵 Musical Glove Game 🎵'),
-        backgroundColor: Color(0xFF073050),
+        title: const Text('🎵 Musical Glove Game 🎵'),
+        backgroundColor: const Color(0xFF073050),
         foregroundColor: Colors.white,
       ),
       body: Center(
@@ -21,32 +23,32 @@ class MainPage extends StatelessWidget {
                 color: Colors.lightBlue[900],
               ),
             ),
-            SizedBox(height: 50),
+            const SizedBox(height: 50),
             Image.asset(
               'assets/glove_main_page.jpg', // Adjust the path to match your image file
               width: 350, // Adjust the width as needed
               height: 350, // Adjust the height as needed
             ),
-            SizedBox(height: 50),
+            const SizedBox(height: 50),
             ElevatedButton(
               onPressed: () {
                 Navigator.pushNamed(context, '/login');
               },
-              child: Text('Login'),
+              child: const Text('Login'),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 Navigator.pushNamed(context, '/register');
               },
-              child: Text('Register'),
+              child: const Text('Register'),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 Navigator.pushNamed(context, '/BT connection');
               },
-              child: Text('BT connection'),
+              child: const Text('BT connection'),
             ),
           ],
         ),

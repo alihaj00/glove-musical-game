@@ -8,10 +8,12 @@ import 'main_menu.dart';
 import 'statistics_page.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -21,13 +23,13 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => MainPage(),
-        '/login': (context) => LoginPage(),
-        '/register': (context) => RegistrationPage(),
-        '/main menu': (context) => MainMenuPage(),
-        '/songs': (context) => SongsPage(),
-        '/statistics': (context) => StatisticsPage(),
-        '/BT connection': (context) => BluetoothDeviceListScreen(),
+        '/': (context) => const MainPage(),
+        '/login': (context) => const LoginPage(),
+        '/register': (context) => const RegistrationPage(),
+        '/main menu': (context) => const MainMenuPage(),
+        '/songs': (context) => const SongsPage(),
+        '/statistics': (context) => const StatisticsPage(),
+        '/BT connection': (context) => const BluetoothDeviceListScreen(),
       },
     );
   }

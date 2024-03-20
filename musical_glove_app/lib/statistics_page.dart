@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import 'ble_handler.dart';
 
 class StatisticsPage extends StatefulWidget {
+  const StatisticsPage({super.key});
+
   @override
   _StatisticsPageState createState() => _StatisticsPageState();
 }
@@ -54,23 +55,23 @@ class _StatisticsPageState extends State<StatisticsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Statistics'),
-        backgroundColor: Color(0xFF073050),
+        title: const Text('Statistics'),
+        backgroundColor: const Color(0xFF073050),
         foregroundColor: Colors.white,
       ),
       body: Center(
         child: isLoading
-            ? CircularProgressIndicator()
+            ? const CircularProgressIndicator()
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text("Latest Score - " + statisticsData),
-                  SizedBox(height: 15),
+                  Text("Latest Score - $statisticsData"),
+                  const SizedBox(height: 15),
                   TextButton(
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    child: Text('Back'),
+                    child: const Text('Back'),
                   ),
           ],
         ),

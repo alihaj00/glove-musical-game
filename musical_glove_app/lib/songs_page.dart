@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import 'ble_handler.dart';
 
 class SongsPage extends StatefulWidget {
+  const SongsPage({super.key});
+
   @override
   _SongsPageState createState() => _SongsPageState();
 }
@@ -14,8 +15,8 @@ class _SongsPageState extends State<SongsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Songs'),
-        backgroundColor: Color(0xFF073050),
+        title: const Text('Songs'),
+        backgroundColor: const Color(0xFF073050),
         foregroundColor: Colors.white,
       ),
       body: Center(
@@ -23,7 +24,7 @@ class _SongsPageState extends State<SongsPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             RadioListTile(
-              title: Text('Song 1'),
+              title: const Text('Song 1'),
               value: 'song1',
               groupValue: selectedSong,
               onChanged: (value) {
@@ -33,7 +34,7 @@ class _SongsPageState extends State<SongsPage> {
               },
             ),
             RadioListTile(
-              title: Text('Song 2'),
+              title: const Text('Song 2'),
               value: 'song2',
               groupValue: selectedSong,
               onChanged: (value) {
@@ -43,7 +44,7 @@ class _SongsPageState extends State<SongsPage> {
               },
             ),
             RadioListTile(
-              title: Text('Song 3'),
+              title: const Text('Song 3'),
               value: 'song3',
               groupValue: selectedSong,
               onChanged: (value) {
@@ -60,15 +61,15 @@ class _SongsPageState extends State<SongsPage> {
                 } else {
                   // Inform the user to select a song
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
+                    const SnackBar(
                       content: Text('Please select a song.'),
                     ),
                   );
                 }
               },
-              child: Text('Hear the song'),
+              child: const Text('Hear the song'),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {
                 if (selectedSong.isNotEmpty) {
@@ -77,21 +78,21 @@ class _SongsPageState extends State<SongsPage> {
                 } else {
                   // Inform the user to select a song
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
+                    const SnackBar(
                       content: Text('Please select a song.'),
                     ),
                   );
                 }
               },
-              child: Text('start play the game'),
+              child: const Text('start play the game'),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             // Back Button
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('Back'),
+              child: const Text('Back'),
             ),
           ],
         ),

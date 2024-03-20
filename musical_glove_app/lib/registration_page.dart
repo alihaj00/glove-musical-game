@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'text_input.dart';
+import 'ble_handler.dart';
 
 class RegistrationPage extends StatefulWidget {
+  const RegistrationPage({super.key});
+
   @override
   _RegistrationPageState createState() => _RegistrationPageState();
 }
@@ -10,13 +13,14 @@ class _RegistrationPageState extends State<RegistrationPage> {
   String username = '';
   String password = '';
   bool hasError = false;
+  bool isLoading = false; // Track loading state
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Registration'),
-        backgroundColor: Color(0xFF073050),
+        title: const Text('Registration'),
+        backgroundColor: const Color(0xFF073050),
         foregroundColor: Colors.white,
       ),
       body: Center(
@@ -32,7 +36,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
               },
               hasError: hasError,
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             InputFields(
               hintText: 'Password',
               onChanged: (value) {
@@ -43,32 +47,48 @@ class _RegistrationPageState extends State<RegistrationPage> {
               hasError: hasError,
             ),
             if (hasError)
-              Padding(
+              const Padding(
                 padding: EdgeInsets.only(top: 8),
                 child: Text(
                   'Invalid username or password',
                   style: TextStyle(color: Colors.red),
                 ),
               ),
-            SizedBox(height: 50),
+            const SizedBox(height: 50),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (_validateInputs(username, password)) {
-                  Navigator.pushNamed(context, '/main menu');
+                  setState(() {
+                    isLoading = true; // Show spinner
+                  });
+                  // Send username and password to ESP32
+                  String response = await BluetoothHandler.sendUsernameAndPassword('register' ,username, password);
+                  setState(() {
+                    isLoading = false; // Hide spinner
+                  });
+                  if (response.toUpperCase() == "1") {
+                    // Move to the main menu page
+                    Navigator.pushNamed(context, '/main menu');
+                  } else {
+                    // Show error message or handle incorrect credentials
+                    setState(() {
+                      hasError = true;
+                    });
+                  }
                 } else {
                   setState(() {
                     hasError = true;
                   });
                 }
               },
-              child: Text('Registration'),
+              child: isLoading ? const CircularProgressIndicator() : const Text('Registration'),
             ),
-            SizedBox(height: 15),
+            const SizedBox(height: 15),
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('Back'),
+              child: const Text('Back'),
             ),
           ],
         ),
