@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'dart:convert';
 import 'dart:async';
+
 BluetoothDevice? esp32Device;
 BluetoothCharacteristic? characteristic;
 bool isSending = false;
@@ -89,18 +91,25 @@ class BluetoothHandler {
 
   static Future<String> sendUsernameAndPassword(String action,
       String username, String password) async {
+    if (isSending) {
+      return '';
+    }
     if (characteristic != null) {
       try {
         isSending = true;
         // Create a Map to organize data
         Map<String, dynamic> requestData = {
-          'action': action,
           'username': username,
           'password': password,
         };
-        // Convert the Map to JSON
+        await characteristic!.write(utf8.encode('start_action_' + action), withoutResponse: true);
         String jsonData = jsonEncode(requestData);
-        await characteristic!.write(utf8.encode(jsonData), withoutResponse: true);
+        for (int i =0; i<jsonData.length; i++ ) {
+          await characteristic!.write(utf8.encode(jsonData[i]), withoutResponse: true);
+          await Future.delayed(const Duration(milliseconds: 1));
+        }
+        await characteristic!.write(utf8.encode('end_action_' + action), withoutResponse: true);
+
         // Wait for a response
         await Future.delayed(const Duration(seconds: 2));
         String response = utf8.decode(await characteristic!.read());

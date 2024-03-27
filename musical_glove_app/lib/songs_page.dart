@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'ble_handler.dart';
 
 class SongsPage extends StatefulWidget {
-  const SongsPage({super.key});
+  const SongsPage({Key? key}) : super(key: key);
 
   @override
   _SongsPageState createState() => _SongsPageState();
@@ -10,84 +10,98 @@ class SongsPage extends StatefulWidget {
 
 class _SongsPageState extends State<SongsPage> {
   String selectedSong = '';
+  String selectedDifficulty = '';
 
   @override
   Widget build(BuildContext context) {
+    List<String> songs = ['Song 1', 'Song 2', 'Song 3'];
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Songs'),
         backgroundColor: const Color(0xFF073050),
         foregroundColor: Colors.white,
       ),
-      body: Center(
+    body: Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            ToggleButton(
+              text: 'Easy',
+              isSelected: selectedDifficulty == 'Easy',
+              onTap: () {
+                setState(() {
+                  selectedDifficulty = 'Easy';
+                });
+              },
+            ),
+            ToggleButton(
+              text: 'Medium',
+              isSelected: selectedDifficulty == 'Medium',
+              onTap: () {
+                setState(() {
+                  selectedDifficulty = 'Medium';
+                });
+              },
+            ),
+            ToggleButton(
+              text: 'Difficult',
+              isSelected: selectedDifficulty == 'Difficult',
+              onTap: () {
+                setState(() {
+                  selectedDifficulty = 'Difficult';
+                });
+              },
+            ),
+          ],
+        ),
+        Expanded(
+          child: ListView.builder(
+              itemCount: songs.length,
+              itemBuilder: (BuildContext context, int index) {
+                String song = songs[index];
+                return ListTile(
+                  title: Text(song),
+                  tileColor: selectedSong == song ? Colors.blue.withOpacity(0.3) : null,
+                  trailing: ElevatedButton(
+                    onPressed: () {
+                      BluetoothHandler.sendSongToESP(song, 'hear', () => setState(() {}));
+                    },
+                    child: const Icon(Icons.play_arrow),
+                  ),
+                  onTap: () {
+                    setState(() {
+                      selectedSong = song;
+                    });
+                  },
+                );
+              },
+          ),
+        ),
+      ],
+    ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(8.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            RadioListTile(
-              title: const Text('Song 1'),
-              value: 'song1',
-              groupValue: selectedSong,
-              onChanged: (value) {
-                setState(() {
-                  selectedSong = value as String;
-                });
-              },
-            ),
-            RadioListTile(
-              title: const Text('Song 2'),
-              value: 'song2',
-              groupValue: selectedSong,
-              onChanged: (value) {
-                setState(() {
-                  selectedSong = value as String;
-                });
-              },
-            ),
-            RadioListTile(
-              title: const Text('Song 3'),
-              value: 'song3',
-              groupValue: selectedSong,
-              onChanged: (value) {
-                setState(() {
-                  selectedSong = value as String;
-                });
-              },
-            ),
+          mainAxisSize: MainAxisSize.min,
+          children: [
             ElevatedButton(
               onPressed: () {
-                if (selectedSong.isNotEmpty) {
-                  // Send the selected song to the ESP
-                  BluetoothHandler.sendSongToESP(selectedSong, 'hear', () => setState(() {}));
+                if (selectedSong.isNotEmpty && selectedDifficulty.isNotEmpty) {
+                  // Do something when both song and difficulty are selected
+                  // For example, navigate to the game screen
                 } else {
-                  // Inform the user to select a song
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Please select a song.'),
+                      content: Text('Please select a song and difficulty.'),
                     ),
                   );
                 }
               },
-              child: const Text('Hear the song'),
+              child: const Text('Start play the game'),
             ),
             const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
-                if (selectedSong.isNotEmpty) {
-                  // Send the selected song to the ESP
-                  BluetoothHandler.sendSongToESP(selectedSong, 'play', () => setState(() {}));
-                } else {
-                  // Inform the user to select a song
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please select a song.'),
-                    ),
-                  );
-                }
-              },
-              child: const Text('start play the game'),
-            ),
-            const SizedBox(height: 10),
-            // Back Button
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
@@ -95,6 +109,35 @@ class _SongsPageState extends State<SongsPage> {
               child: const Text('Back'),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class ToggleButton extends StatelessWidget {
+  final String text;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const ToggleButton({
+    required this.text,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          text,
+          style: TextStyle(
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            fontSize: isSelected ? 20 : 16,
+          ),
         ),
       ),
     );
