@@ -91,6 +91,7 @@ class _SongsPageState extends State<SongsPage> {
                 if (selectedSong.isNotEmpty && selectedDifficulty.isNotEmpty) {
                   // Do something when both song and difficulty are selected
                   // For example, navigate to the game screen
+                  Navigator.pushNamed(context, '/game');
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(

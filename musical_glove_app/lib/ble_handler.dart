@@ -102,13 +102,13 @@ class BluetoothHandler {
           'username': username,
           'password': password,
         };
-        await characteristic!.write(utf8.encode('start_action_' + action), withoutResponse: true);
+        await characteristic!.write(utf8.encode('start_action_' + action));
         String jsonData = jsonEncode(requestData);
-        for (int i =0; i<jsonData.length; i++ ) {
-          await characteristic!.write(utf8.encode(jsonData[i]), withoutResponse: true);
-          await Future.delayed(const Duration(milliseconds: 1));
+        for (int i =0; i<jsonData.length; i+=19 ) {
+          int end = i+19 < jsonData.length ? i + 19 : jsonData.length;
+          await characteristic!.write(utf8.encode(jsonData.substring(i,end)));
         }
-        await characteristic!.write(utf8.encode('end_action_' + action), withoutResponse: true);
+        await characteristic!.write(utf8.encode('end_action_' + action));
 
         // Wait for a response
         await Future.delayed(const Duration(seconds: 2));

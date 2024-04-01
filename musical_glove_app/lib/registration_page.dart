@@ -66,7 +66,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   setState(() {
                     isLoading = false; // Hide spinner
                   });
-                  if (response.toUpperCase() == "1") {
+                  if (response == "register_ok") {
                     // Move to the main menu page
                     Navigator.pushNamed(context, '/main menu');
                   } else {
