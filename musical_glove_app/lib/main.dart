@@ -6,6 +6,7 @@ import 'songs_page.dart';
 import 'ble_handler.dart';
 import 'main_menu.dart';
 import 'statistics_page.dart';
+import 'add_song.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
         '/songs': (context) => const SongsPage(),
         '/statistics': (context) => const StatisticsPage(),
         '/BT connection': (context) => const BluetoothDeviceListScreen(),
+        '/add song': (context) => const AddSongPage(),
       },
     );
   }
