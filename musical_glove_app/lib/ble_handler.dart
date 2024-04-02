@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'dart:convert';
 import 'dart:async';
@@ -49,26 +48,6 @@ class BluetoothHandler {
     }
   }
 
-  static Future<void> sendSongToESP(
-      String selectedSong, String action, Function setState) async {
-    if (characteristic != null) {
-      try {
-        isSending = true;
-        await characteristic!
-            .write(utf8.encode("${selectedSong}_$action"), withoutResponse: true);
-        // Wait for a response
-        await Future.delayed(const Duration(seconds: 2));
-        String response = utf8.decode(await characteristic!.read());
-        print(response);
-      } catch (e) {
-        print('Failed to send the song: $e');
-      } finally {
-        isSending = false;
-        setState();
-      }
-    }
-  }
-
   static Future<void> sendRequest(
       String request, Function setState) async {
     if (characteristic != null) {
@@ -89,39 +68,52 @@ class BluetoothHandler {
     }
   }
 
+  static Future<bool> SendDataJSONtoESP(String data) async {
+    try {
+      for (int i =0; i<data.length; i+=19 ) {
+        int end = i + 19 < data.length ? i + 19 : data.length;
+        await characteristic!.write(utf8.encode(data.substring(i, end)));
+      }
+      return true;
+    }
+    catch (e) {
+      print('Failed to send username and password: $e');
+      return false;
+    }
+  }
+
+  static Future<void> sendSongActionToESP(
+      String selectedSong, String action, Function setState) async {
+    sendRequest("${selectedSong}_$action", setState);
+  }
+
   static Future<String> sendUsernameAndPassword(String action,
       String username, String password) async {
     if (isSending) {
       return '';
     }
-    if (characteristic != null) {
-      try {
-        isSending = true;
-        // Create a Map to organize data
-        Map<String, dynamic> requestData = {
-          'username': username,
-          'password': password,
-        };
-        await characteristic!.write(utf8.encode('start_action_' + action));
-        String jsonData = jsonEncode(requestData);
-        for (int i =0; i<jsonData.length; i+=19 ) {
-          int end = i+19 < jsonData.length ? i + 19 : jsonData.length;
-          await characteristic!.write(utf8.encode(jsonData.substring(i,end)));
-        }
-        await characteristic!.write(utf8.encode('end_action_' + action));
+    try {
+      isSending = true;
+      // Create a Map to organize data
+      Map<String, dynamic> requestData = {
+        'username': username,
+        'password': password,
+      };
+      await characteristic!.write(utf8.encode('start_action_' + action));
+      String jsonData = jsonEncode(requestData);
+      await SendDataJSONtoESP(jsonData);
+      await characteristic!.write(utf8.encode('end_action_' + action));
 
-        // Wait for a response
-        await Future.delayed(const Duration(seconds: 2));
-        String response = utf8.decode(await characteristic!.read());
-        return response.trim();
-      } catch (e) {
-        print('Failed to send username and password: $e');
-        return ''; // Return empty response on failure
-      } finally {
-        isSending = false;
-      }
-    } else {
-      return ''; // Return empty response if characteristic is null
+      // Wait for a response
+      await Future.delayed(const Duration(seconds: 2));
+      String response = utf8.decode(await characteristic!.read());
+      print("in reg:" + response);
+      return response.trim();
+    } catch (e) {
+      print('Failed to send username and password: $e');
+      return ''; // Return empty response on failure
+    } finally {
+      isSending = false;
     }
   }
 }

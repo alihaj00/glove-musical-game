@@ -66,9 +66,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   setState(() {
                     isLoading = false; // Hide spinner
                   });
+                  print(response);
                   if (response == "register_ok") {
                     // Move to the main menu page
-                    Navigator.pushNamed(context, '/main menu');
+                    Navigator.pushNamed(context, '/songs');
                   } else {
                     // Show error message or handle incorrect credentials
                     setState(() {
