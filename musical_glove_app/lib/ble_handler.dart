@@ -96,7 +96,7 @@ class BluetoothHandler {
       isSending = true;
       // Create a Map to organize data
       Map<String, dynamic> requestData = {
-        'username': username,
+        'username': username.toLowerCase(),
         'password': password,
       };
       await characteristic!.write(utf8.encode('start_action_' + action));
@@ -115,6 +115,14 @@ class BluetoothHandler {
     } finally {
       isSending = false;
     }
+  }
+
+  static Future<String> getSongActionToESP(Function setState) async {
+    await sendRequest("song_list", setState);
+    // Wait for a response
+    await Future.delayed(const Duration(seconds: 2));
+    List<int> responseBytes = await characteristic!.read();
+    return utf8.decode(responseBytes);
   }
 }
 

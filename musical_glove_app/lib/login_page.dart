@@ -3,7 +3,7 @@ import 'text_input.dart';
 import 'ble_handler.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -12,7 +12,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   String username = '';
   String password = '';
-  bool hasError = false;
+  String errorMessage = '';
   bool isLoading = false; // Track loading state
 
   @override
@@ -34,7 +34,6 @@ class _LoginPageState extends State<LoginPage> {
                   username = value;
                 });
               },
-              hasError: hasError,
             ),
             const SizedBox(height: 10),
             InputFields(
@@ -44,42 +43,44 @@ class _LoginPageState extends State<LoginPage> {
                   password = value;
                 });
               },
-              hasError: hasError,
             ),
-            if (hasError)
-              const Padding(
-                padding: EdgeInsets.only(top: 8),
+            if (errorMessage.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
                 child: Text(
-                  'Invalid username or password',
-                  style: TextStyle(color: Colors.red),
+                  errorMessage,
+                  style: const TextStyle(color: Colors.red),
                 ),
               ),
             const SizedBox(height: 50),
             ElevatedButton(
               onPressed: () async {
+                setState(() {
+                  errorMessage = ''; // Reset error message
+                  isLoading = true; // Show spinner
+                });
+
                 if (_validateInputs(username, password)) {
-                  setState(() {
-                    isLoading = true; // Show spinner
-                  });
                   // Send username and password to ESP32
-                  String response = await BluetoothHandler.sendUsernameAndPassword('login' ,username, password);
+                  String response = await BluetoothHandler.sendUsernameAndPassword('login', username, password);
                   setState(() {
                     isLoading = false; // Hide spinner
                   });
                   print(response);
                   if (response == "login_ok") {
-                  // if (true) {
                     // Move to the main menu page
                     Navigator.pushNamed(context, '/songs');
                   } else {
-                    // Show error message or handle incorrect credentials
+                    // Show error message from server
                     setState(() {
-                      hasError = true;
+                      errorMessage = response.isNotEmpty ? response : 'Invalid username or password';
                     });
                   }
                 } else {
+                  // Show validation error message
                   setState(() {
-                    hasError = true;
+                    isLoading = false;
+                    errorMessage = 'Invalid username or password. Make sure to type only letters and numbers, and that they are not empty';
                   });
                 }
               },
@@ -99,10 +100,24 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   bool _validateInputs(String username, String password) {
-    // Implement your validation logic here
+    // Regular expression to match only letters and numbers
+    RegExp usernameRegex = RegExp(r'^[a-zA-Z0-9]+$');
+    RegExp passwordRegex = RegExp(r'^[a-zA-Z0-9]+$');
+
     if (username.isNotEmpty && password.isNotEmpty) {
+      if (!usernameRegex.hasMatch(username)) {
+        print('Username can only contain letters and numbers.');
+        return false;
+      }
+
+      if (!passwordRegex.hasMatch(password)) {
+        print('Password can only contain letters and numbers.');
+        return false;
+      }
+
       return true;
     }
+
     return false;
   }
 }

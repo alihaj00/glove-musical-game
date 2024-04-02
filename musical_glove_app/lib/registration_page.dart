@@ -50,7 +50,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
               const Padding(
                 padding: EdgeInsets.only(top: 8),
                 child: Text(
-                  'Invalid username or password',
+                  'Invalid username or password. Make sure to type only letters and numbers, and that they are not empty',
                   style: TextStyle(color: Colors.red),
                 ),
               ),
@@ -98,10 +98,24 @@ class _RegistrationPageState extends State<RegistrationPage> {
   }
 
   bool _validateInputs(String username, String password) {
-    // Implement your validation logic here
+    // Regular expression to match only letters and numbers
+    RegExp usernameRegex = RegExp(r'^[a-zA-Z0-9]+$');
+    RegExp passwordRegex = RegExp(r'^[a-zA-Z0-9]+$');
+
     if (username.isNotEmpty && password.isNotEmpty) {
+      if (!usernameRegex.hasMatch(username)) {
+        print('Username can only contain letters and numbers.');
+        return false;
+      }
+
+      if (!passwordRegex.hasMatch(password)) {
+        print('Password can only contain letters and numbers.');
+        return false;
+      }
+
       return true;
     }
+
     return false;
   }
 }
