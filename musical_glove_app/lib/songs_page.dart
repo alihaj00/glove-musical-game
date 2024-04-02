@@ -58,25 +58,61 @@ class _SongsPageState extends State<SongsPage> {
         ),
         Expanded(
           child: ListView.builder(
-              itemCount: songs.length,
-              itemBuilder: (BuildContext context, int index) {
-                String song = songs[index];
-                return ListTile(
-                  title: Text(song),
-                  tileColor: selectedSong == song ? Colors.blue.withOpacity(0.3) : null,
-                  trailing: ElevatedButton(
-                    onPressed: () {
-                      BluetoothHandler.sendSongToESP(song, 'hear', () => setState(() {}));
-                    },
-                    child: const Icon(Icons.play_arrow),
+            itemCount: songs.length + 1, // Add one for the "add song" card
+            itemBuilder: (BuildContext context, int index) {
+              if (index == songs.length) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                  child: Card(
+                    color: Colors.grey[300],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15.0),
+                    ),
+                    child: ListTile(
+                      title: Center(
+                        child: Column(
+                          children: [
+                            Text('Add Song', style: TextStyle(fontWeight: FontWeight.bold)),
+                            IconButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/add song');
+                              },
+                              icon: Icon(Icons.add),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                  onTap: () {
-                    setState(() {
-                      selectedSong = song;
-                    });
-                  },
                 );
-              },
+              }
+              String song = songs[index];
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(15.0),
+                  child: Material(
+                    color: selectedSong == song ? Colors.blue.withOpacity(0.3) : Colors.grey[300],
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          selectedSong = song;
+                        });
+                      },
+                      child: ListTile(
+                        title: Text(song),
+                        trailing: ElevatedButton(
+                          onPressed: () {
+                            BluetoothHandler.sendSongActionToESP(song, 'hear', () => setState(() {}));
+                          },
+                          child: const Icon(Icons.play_arrow),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ],

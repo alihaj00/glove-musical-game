@@ -26,25 +26,43 @@ class AddSongPageState extends State<AddSongPage> {
         children: [
           SizedBox(height: 20),
           Expanded(
-            child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                childAspectRatio: 3,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
+            child: Center(
+              child: GridView.builder(
+                shrinkWrap: true,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  childAspectRatio: 1.0,
+                  crossAxisSpacing: 20,
+                  mainAxisSpacing: 20,
+                ),
+                itemCount: notes.length,
+                itemBuilder: (context, index) {
+                  return Column(
+                    children: [
+                      Container(
+                        width: 100,
+                        height: 100,
+                        child: IconButton(
+                          icon: Icon(Icons.music_note, size: 50), // Icon for note button
+                          onPressed: () {
+                            setState(() {
+                              notesController.text += notes[index] + ",";
+                              selectedNotes = notesController.text;
+                            });
+                          },
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          notes[index],
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
-              itemCount: notes.length,
-              itemBuilder: (context, index) {
-                return ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      notesController.text += notes[index] + ",";
-                      selectedNotes = notesController.text;
-                    });
-                  },
-                  child: Text(notes[index]),
-                );
-              },
             ),
           ),
           SizedBox(height: 20),
@@ -101,22 +119,19 @@ class AddSongPageState extends State<AddSongPage> {
   }
 
   bool validateInputsNotes(String selectedNotes) {
-    selectedNotes = selectedNotes + "finish";
-    final splitted = selectedNotes.split(",");
-    if (splitted[splitted.length-1] != "finish") {
-      return false;
+    String toSplit = selectedNotes;
+    // Check if the string ends with a comma
+    if (toSplit.endsWith(',')) {
+      // Trim the comma from the end of the string
+      toSplit = toSplit.substring(0, toSplit.length - 1);
     }
-    for (int i =0; i< splitted.length-1; i++) {
+    final splitted = toSplit.split(",");
+    for (int i =0; i < splitted.length; i++) {
       if (!notes.contains(splitted[i]) && splitted[i] != null) {
-        return false;
+          return false;
       }
     }
     return true;
   }
 }
 
-void main() {
-  runApp(MaterialApp(
-    home: AddSongPage(),
-  ));
-}

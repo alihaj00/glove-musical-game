@@ -42,12 +42,6 @@ class _MainMenuPageState extends State<MainMenuPage> {
               },
               child: const Text('Statistics'),
             ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/add song');
-              },
-              child: const Text('Add Song'),
-            ),
             const SizedBox(height: 15),
             TextButton(
               onPressed: () {
