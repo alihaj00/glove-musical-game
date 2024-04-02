@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'ble_handler.dart';
+import 'text_input.dart';
 
 class AddSongPage extends StatefulWidget {
   const AddSongPage({Key? key}) : super(key: key);
@@ -11,7 +13,7 @@ class AddSongPageState extends State<AddSongPage> {
   String selectedSongName = '';
   String selectedNotes = '';
   TextEditingController notesController = TextEditingController();
-  List<String> notes = ['do', 're', 'me', 'fa', 'sol', 'la', 'ci', 'Pause'];
+  List<String> notes = ['do', 're', 'me', 'fa', 'sol', 'la', 'si', 'Pause'];
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +47,7 @@ class AddSongPageState extends State<AddSongPage> {
                         child: IconButton(
                           icon: Icon(Icons.music_note, size: 50), // Icon for note button
                           onPressed: () {
+                            BluetoothHandler.sendRequest('play_note_' + notes[index], () => setState(() {}));
                             setState(() {
                               notesController.text += notes[index] + ",";
                               selectedNotes = notesController.text;
@@ -66,12 +69,10 @@ class AddSongPageState extends State<AddSongPage> {
             ),
           ),
           SizedBox(height: 20),
-          Container(
+          Padding(
             padding: EdgeInsets.symmetric(horizontal: 20),
-            child: TextField(
-              decoration: InputDecoration(
-                labelText: 'Song Name',
-              ),
+            child: InputFields(
+              hintText: 'Song Name',
               onChanged: (value) {
                 setState(() {
                   selectedSongName = value;
@@ -80,18 +81,16 @@ class AddSongPageState extends State<AddSongPage> {
             ),
           ),
           SizedBox(height: 20),
-          Container(
+          Padding(
             padding: EdgeInsets.symmetric(horizontal: 20),
-            child: TextField(
-              decoration: InputDecoration(
-                labelText: 'Song Notes',
-              ),
-              controller: notesController,
+            child: InputFields(
+              hintText: 'Song Notes',
               onChanged: (value) {
                 setState(() {
-                  selectedNotes  = value;
+                  selectedNotes = value;
                 });
               },
+              controller: notesController,
             ),
           ),
           SizedBox(height: 20),
@@ -99,13 +98,19 @@ class AddSongPageState extends State<AddSongPage> {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: ElevatedButton(
               onPressed: () {
-                if(validateInputsNotes(selectedNotes)) {
+                bool validNotes = validateInputsNotes(selectedNotes);
+                bool validName = validateInputsSongName(selectedSongName);
+                if(validNotes && validName) {
+                  BluetoothHandler.saveSongTOESP(selectedSongName,selectedNotes);
                   // Save button functionality
                   print('Song Name: $selectedSongName');
                   print('Song Notes: $selectedNotes');
                 }
-                else {
-                  print('Invalid notes format. Please be rigorous about notes name separated by comma');
+                else if (!validName) {
+                  showErrorSnackbar(context, 'Invalid song name. Make sure to type only letters and numbers, and that it is not empty.');
+                }
+                else if (!validNotes) {
+                  showErrorSnackbar(context, 'Invalid notes format. Please be rigorous about notes name separated by comma');
                 }
                 // Here you can add the functionality to save the song
               },
@@ -128,10 +133,32 @@ class AddSongPageState extends State<AddSongPage> {
     final splitted = toSplit.split(",");
     for (int i =0; i < splitted.length; i++) {
       if (!notes.contains(splitted[i]) && splitted[i] != null) {
-          return false;
+        return false;
       }
     }
     return true;
   }
-}
 
+  bool validateInputsSongName(String selectedSongName) {
+    // Regular expression to match only letters and numbers
+    RegExp selectedSongNameeRegex = RegExp(r'^[a-zA-Z0-9]+$');
+
+    if (selectedSongName.isNotEmpty) {
+      if (!selectedSongNameeRegex.hasMatch(selectedSongName)) {
+        return false;
+      }
+      return true;
+    }
+
+    return false;
+  }
+
+  void showErrorSnackbar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}

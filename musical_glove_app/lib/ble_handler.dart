@@ -107,7 +107,6 @@ class BluetoothHandler {
       // Wait for a response
       await Future.delayed(const Duration(seconds: 2));
       String response = utf8.decode(await characteristic!.read());
-      print("in reg:" + response);
       return response.trim();
     } catch (e) {
       print('Failed to send username and password: $e');
@@ -123,6 +122,48 @@ class BluetoothHandler {
     await Future.delayed(const Duration(seconds: 2));
     List<int> responseBytes = await characteristic!.read();
     return utf8.decode(responseBytes);
+  }
+
+  static Future<String> saveSongTOESP(String songname, String notes) async {
+    if (isSending) {
+      return '';
+    }
+    try {
+      isSending = true;
+      String toSplit = notes;
+      String toSend = '';
+      // Check if the string ends with a comma
+      if (toSplit.endsWith(',')) {
+        // Trim the comma from the end of the string
+        toSplit = toSplit.substring(0, toSplit.length - 1);
+      }
+      final splitted = toSplit.split(",");
+      // make formated note stirng for the ESP
+      for (int i =0; i < splitted.length; i++) {
+        toSend += splitted[i] + '_,';
+      }
+      toSend += 'END';
+      print("toSend: " + toSend );
+      // Create a Map to organize data
+      Map<String, dynamic> requestData = {
+        'songname': songname,
+        'notes': toSend,
+      };
+      await characteristic!.write(utf8.encode('start_action_savesong'));
+      String jsonData = jsonEncode(requestData);
+      await SendDataJSONtoESP(jsonData);
+      await characteristic!.write(utf8.encode('end_action_savesong'));
+
+      // Wait for a response
+      await Future.delayed(const Duration(seconds: 2));
+      String response = utf8.decode(await characteristic!.read());
+      return response.trim();
+    } catch (e) {
+      print('Failed to save song: $e');
+      return ''; // Return empty response on failure
+    } finally {
+      isSending = false;
+    }
   }
 }
 

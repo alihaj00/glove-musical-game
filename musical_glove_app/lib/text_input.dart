@@ -4,13 +4,15 @@ class InputFields extends StatefulWidget {
   final String hintText;
   final Function(String) onChanged;
   final bool hasError;
+  final TextEditingController? controller; // Make the controller optional
 
   const InputFields({
-    super.key,
+    Key? key,
     required this.hintText,
     required this.onChanged,
     this.hasError = false,
-  });
+    this.controller, // Provide default value of null
+  }) : super(key: key);
 
   @override
   _InputFieldsState createState() => _InputFieldsState();
@@ -22,12 +24,16 @@ class _InputFieldsState extends State<InputFields> {
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController();
+    // Initialize the controller if it's provided, otherwise create a new one
+    _controller = widget.controller ?? TextEditingController();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    // Dispose the controller if it's not null
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 
