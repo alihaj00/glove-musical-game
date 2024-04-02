@@ -12,6 +12,7 @@ class SongsPage extends StatefulWidget {
 class _SongsPageState extends State<SongsPage> {
   String selectedSong = '';
   String selectedDifficulty = 'Easy';
+  // late Future<List<String>> _songsFuture = _getSongs();
   late Future<List<String>> _songsFuture = _getSongs();
 
   @override
@@ -200,6 +201,7 @@ class _SongsPageState extends State<SongsPage> {
   }
 
   Future<List<String>> _getSongs() async {
+    return ['song1', 'song2'];
     try {
       String response = await BluetoothHandler.getSongActionToESP(() => setState(() {}));
       dynamic decodedResponse = jsonDecode(response);
