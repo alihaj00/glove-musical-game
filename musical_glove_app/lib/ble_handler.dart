@@ -10,6 +10,24 @@ String responseMessage = ''; // Static variable for response message
 Function? setStateCallback;
 
 class BluetoothHandler {
+  static Future<void> setupNotifications() async {
+    await characteristic!.setNotifyValue(true);
+  }
+
+  static Stream<List<int>> getCharacteristicStream() {
+    return characteristic!.value;
+  }
+
+  static void dispose() {
+    // Clean up resources here
+    // For example:
+    if (characteristic != null) {
+      characteristic!.setNotifyValue(false); // Stop notifications
+      characteristic!.value.listen((data) {}).cancel(); // Cancel stream subscription
+    }
+    // Close connections, stop ongoing operations, etc.
+  }
+
   static Future<void> connectToDevice(
       BluetoothDevice device, Function setState) async {
     try {
@@ -56,9 +74,9 @@ class BluetoothHandler {
         await characteristic!
             .write(utf8.encode(request), withoutResponse: true);
         // Wait for a response
-        await Future.delayed(const Duration(seconds: 2));
-        String response = utf8.decode(await characteristic!.read());
-        print(response);
+        await Future.delayed(const Duration(milliseconds: 10));
+        // String response = utf8.decode(await characteristic!.read());
+        // print(response);
         setState();
       } catch (e) {
         print('Failed to send the request: $e');
@@ -116,7 +134,7 @@ class BluetoothHandler {
     }
   }
 
-  static Future<String> getSongActionToESP(Function setState) async {
+  static Future<String> getSongListFromESP(Function setState) async {
     await sendRequest("song_list", setState);
     // Wait for a response
     await Future.delayed(const Duration(seconds: 2));
@@ -164,6 +182,12 @@ class BluetoothHandler {
     } finally {
       isSending = false;
     }
+  }
+
+  static Future<String> getNoteFromESP() async {
+    List<int> data = await characteristic!.read();
+    print('note:${utf8.decode(data)}');
+    return utf8.decode(data);
   }
 }
 

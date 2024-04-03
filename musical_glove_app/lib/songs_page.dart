@@ -92,8 +92,15 @@ class _SongsPageState extends State<SongsPage> {
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                           child: GestureDetector(
-                            onTap: () {
-                              Navigator.pushNamed(context, '/add song');
+                            onTap: () async {
+                              final result = await Navigator.pushNamed(context, '/add song');
+                              // Reload songs list when returning from the "add song" page
+                              if (result == true) {
+                                // Reload songs list
+                                setState(() {
+                                  _songsFuture = _getSongs();
+                                });
+                              }
                             },
                             child: Card(
                               color: Colors.grey[300],
@@ -169,8 +176,12 @@ class _SongsPageState extends State<SongsPage> {
                   if (selectedSong.isNotEmpty && selectedDifficulty.isNotEmpty) {
                     // Do something when both song and difficulty are selected
                     // For example, navigate to the game screen
-                    BluetoothHandler.sendSongActionToESP(selectedSong, 'play_' + MapDifficulty(selectedDifficulty), () => setState(() {}));
-                    Navigator.pushNamed(context, '/game');
+                    final data = {
+                      "selectedSong": selectedSong,
+                      "selectedDifficulty": selectedDifficulty
+                      // Add other data you want to pass to the gameplay page
+                    };
+                    Navigator.pushNamed(context, '/game',  arguments: data);
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -201,14 +212,15 @@ class _SongsPageState extends State<SongsPage> {
   }
 
   Future<List<String>> _getSongs() async {
-    return ['song1', 'song2'];
+    // return ['song1', 'song2'];
     try {
-      String response = await BluetoothHandler.getSongActionToESP(() => setState(() {}));
+      String response = await BluetoothHandler.getSongListFromESP(() => setState(() {}));
       dynamic decodedResponse = jsonDecode(response);
       List<String> songs = [];
       decodedResponse.forEach((key, value) {
         if (value is String) {
           songs.add(value);
+          print(value);
         }
       });
       return songs;
@@ -217,18 +229,6 @@ class _SongsPageState extends State<SongsPage> {
       throw Exception('Failed to load songs: $e');
     }
   }
-}
-
-String MapDifficulty(String difficulty) {
-  switch(difficulty) {
-    case 'Easy':
-      return '1';
-    case 'Medium':
-      return '2';
-    case 'Hard':
-      return '3';
-  }
-  return '';
 }
 
 class ToggleButton extends StatelessWidget {

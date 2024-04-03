@@ -66,8 +66,8 @@ class _LoginPageState extends State<LoginPage> {
                   setState(() {
                     isLoading = false; // Hide spinner
                   });
-                  print(response);
                   if (response == "login_ok") {
+                  // if (true) {
                     // Move to the main menu page
                     Navigator.pushNamed(context, '/songs');
                   } else {

@@ -31,7 +31,10 @@ class MyApp extends StatelessWidget {
         '/statistics': (context) => const StatisticsPage(),
         '/BT connection': (context) => const BluetoothDeviceListScreen(),
         '/add song': (context) => const AddSongPage(),
-        '/game': (context) => const GamePlayPage(),
+        '/game': (context) {
+          final Map<String, dynamic>? data = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+          return GamePlayPage(data: data ?? {});
+        },
       },
     );
   }

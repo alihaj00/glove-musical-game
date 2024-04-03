@@ -1,8 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'ble_handler.dart';
+import 'dart:convert';
 
 class GamePlayPage extends StatefulWidget {
-  const GamePlayPage({Key? key}) : super(key: key);
+  final Map<String, dynamic> data;
+
+  const GamePlayPage({Key? key, required this.data}) : super(key: key);
 
   @override
   _GamePlayPageState createState() => _GamePlayPageState();
@@ -11,12 +15,34 @@ class GamePlayPage extends StatefulWidget {
 class _GamePlayPageState extends State<GamePlayPage> {
   List<int> highlightedCircles = [];
   bool showContent = false;
+  String note = '';
 
   @override
   void initState() {
     super.initState();
     // Start the countdown
     startCountdown();
+    }
+
+  void receiveNotesFromESP() async {
+    await BluetoothHandler.setupNotifications();
+    BluetoothHandler.getCharacteristicStream().listen((List<int> data) {
+      String receivedNote = utf8.decode(data);
+      setState(() {
+        note = receivedNote;
+      });
+      print(note);
+      if (note == 'END') {
+        // Handle 'END' note
+        print('---Ended----');
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    // Clean up resources
+    BluetoothHandler.dispose();
   }
 
   void startCountdown() {
@@ -24,6 +50,11 @@ class _GamePlayPageState extends State<GamePlayPage> {
     Timer(Duration(seconds: 3), () {
       setState(() {
         showContent = true; // Show content after countdown
+        print('sending start');
+        // Here you can apply BThandler.sendSongToESP
+        BluetoothHandler.sendSongActionToESP(widget.data['selectedSong'], 'play_${MapDifficulty(widget.data['selectedDifficulty'])}', () => setState(() {}));
+        // Now, initiate receiving notes from ESP
+        receiveNotesFromESP();
       });
     });
   }
@@ -127,4 +158,17 @@ class CircleWidget extends StatelessWidget {
       ),
     );
   }
+
+}
+
+String MapDifficulty(String difficulty) {
+  switch(difficulty) {
+    case 'Easy':
+      return '1';
+    case 'Medium':
+      return '2';
+    case 'Hard':
+      return '3';
+  }
+  return '';
 }

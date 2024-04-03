@@ -29,42 +29,13 @@ class AddSongPageState extends State<AddSongPage> {
           SizedBox(height: 20),
           Expanded(
             child: Center(
-              child: GridView.builder(
-                shrinkWrap: true,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  childAspectRatio: 1.0,
-                  crossAxisSpacing: 20,
-                  mainAxisSpacing: 20,
+              child: SingleChildScrollView( // Wrap with SingleChildScrollView
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 20,
+                  runSpacing: 20,
+                  children: notes.map((note) => _buildNoteButton(note)).toList(),
                 ),
-                itemCount: notes.length,
-                itemBuilder: (context, index) {
-                  return Column(
-                    children: [
-                      Container(
-                        width: 100,
-                        height: 100,
-                        child: IconButton(
-                          icon: Icon(Icons.music_note, size: 50), // Icon for note button
-                          onPressed: () {
-                            BluetoothHandler.sendRequest('play_note_' + notes[index], () => setState(() {}));
-                            setState(() {
-                              notesController.text += notes[index] + ",";
-                              selectedNotes = notesController.text;
-                            });
-                          },
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          notes[index],
-                          textAlign: TextAlign.center,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  );
-                },
               ),
             ),
           ),
@@ -105,6 +76,9 @@ class AddSongPageState extends State<AddSongPage> {
                   // Save button functionality
                   print('Song Name: $selectedSongName');
                   print('Song Notes: $selectedNotes');
+
+                  // Pass back a flag indicating a new song has been added
+                  Navigator.pop(context, true);
                 }
                 else if (!validName) {
                   showErrorSnackbar(context, 'Invalid song name. Make sure to type only letters and numbers, and that it is not empty.');
@@ -159,6 +133,32 @@ class AddSongPageState extends State<AddSongPage> {
         content: Text(message),
         backgroundColor: Colors.red,
       ),
+    );
+  }
+
+  Widget _buildNoteButton(String note) {
+    return Column(
+      children: [
+        Container(
+          width: 100, // Adjust the width here
+          height: 100, // Adjust the height here
+          child: IconButton(
+            icon: Icon(Icons.music_note, size: 50), // Icon for note button
+            onPressed: () {
+              BluetoothHandler.sendRequest('play_note_$note', () => setState(() {}));
+              setState(() {
+                notesController.text += '$note,';
+                selectedNotes = notesController.text;
+              });
+            },
+          ),
+        ),
+        Text(
+          note,
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
     );
   }
 }
