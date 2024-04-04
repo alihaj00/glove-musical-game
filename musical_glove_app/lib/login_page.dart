@@ -19,14 +19,52 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login'),
-        backgroundColor: const Color(0xFF073050),
-        foregroundColor: Colors.white,
+        title: const Text(
+          'Musical Glove',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w400,
+            color: Color.fromRGBO(0, 176, 143, 1),
+          ),
+        ),
+        backgroundColor: Colors.white,
       ),
+      resizeToAvoidBottomInset: false, // Prevent screen resizing when keyboard appears
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
+            const SizedBox(height: 50),
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(50.0, 40.0, 0.0, 0.0),
+                child: Text(
+                  'Log In',
+                  style: TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.w500,
+                    color: Color.fromRGBO(0, 176, 143, 1),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 50),
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(60.0, 16.0, 0.0, 0.0),
+                child: Text(
+                  'Username',
+                  style: TextStyle(
+                    fontSize: 18,
+                    decorationColor: Color.fromRGBO(13, 13, 13, 1),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
             InputFields(
               hintText: 'Username',
               onChanged: (value) {
@@ -34,6 +72,21 @@ class _LoginPageState extends State<LoginPage> {
                   username = value;
                 });
               },
+            ),
+            const SizedBox(height: 40),
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(60.0, 16.0, 0.0, 0.0),
+                child: Text(
+                  'Password',
+                  style: TextStyle(
+                    fontSize: 18,
+                    decorationColor: Color.fromRGBO(13, 13, 13, 1),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 10),
             InputFields(
@@ -52,46 +105,73 @@ class _LoginPageState extends State<LoginPage> {
                   style: const TextStyle(color: Colors.red),
                 ),
               ),
-            const SizedBox(height: 50),
-            ElevatedButton(
-              onPressed: () async {
-                setState(() {
-                  errorMessage = ''; // Reset error message
-                  isLoading = true; // Show spinner
-                });
-
-                if (_validateInputs(username, password)) {
-                  // Send username and password to ESP32
-                  String response = await BluetoothHandler.sendUsernameAndPassword('login', username, password);
-                  setState(() {
-                    isLoading = false; // Hide spinner
-                  });
-                  if (response == "login_ok") {
-                  // if (true) {
-                    // Move to the main menu page
-                    Navigator.pushNamed(context, '/songs');
-                  } else {
-                    // Show error message from server
+            const SizedBox(height: 100),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(200.0, 135.0, 20.0, 0.0),
+                child: ElevatedButton(
+                  onPressed: () async {
                     setState(() {
-                      errorMessage = response.isNotEmpty ? response : 'Invalid username or password';
+                      errorMessage = ''; // Reset error message
+                      isLoading = true; // Show spinner
                     });
-                  }
-                } else {
-                  // Show validation error message
-                  setState(() {
-                    isLoading = false;
-                    errorMessage = 'Invalid username or password. Make sure to type only letters and numbers, and that they are not empty';
-                  });
-                }
-              },
-              child: isLoading ? const CircularProgressIndicator() : const Text('Login'),
-            ),
-            const SizedBox(height: 15),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Back'),
+
+                    if (_validateInputs(username, password)) {
+                      // Send username and password to ESP32
+                      String response = await BluetoothHandler.sendUsernameAndPassword('login', username, password);
+                      setState(() {
+                        isLoading = false; // Hide spinner
+                      });
+                      if (response == "login_ok") {
+                      // if (true) {
+                        // Move to the main menu page
+                        Navigator.pushNamed(context, '/songs');
+                      } else {
+                        // Show error message from server
+                        setState(() {
+                          errorMessage = response.isNotEmpty ? response : 'Invalid username or password';
+                        });
+                      }
+                    } else {
+                      // Show validation error message
+                      setState(() {
+                        isLoading = false;
+                        errorMessage = 'Invalid username or password. Make sure to type only letters and numbers, and that they are not empty';
+                      });
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20), // Rounded corners
+                    ),
+                    padding: const EdgeInsets.all(10), // Padding for the button content
+                    elevation: 0, // No shadow
+                    backgroundColor: Colors.transparent, // Transparent background color
+                    foregroundColor: Colors.white,
+                  ),
+                  child: Ink(
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color.fromRGBO(9, 145, 120, 1),
+                          Color.fromRGBO(87, 190, 171, 1),
+                          Color.fromRGBO(116, 208, 164, 1),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(20), // Rounded corners
+                    ),
+                    child: Container(
+                      alignment: Alignment.center,
+                      width: 130, // Adjust the width as needed
+                      height: 40, // Adjust the height as needed
+                      child: isLoading ? const CircularProgressIndicator() : const Text('Next'),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ],
         ),

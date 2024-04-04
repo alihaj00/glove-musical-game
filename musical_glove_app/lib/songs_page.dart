@@ -19,9 +19,15 @@ class _SongsPageState extends State<SongsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Choose Song And Difficulty'),
-        backgroundColor: const Color(0xFF073050),
-        foregroundColor: Colors.white,
+        title: const Text(
+          'Musical Glove',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w400,
+            color: Color.fromRGBO(0, 176, 143, 1),
+          ),
+        ),
+        backgroundColor: Colors.white,
       ),
       body: FutureBuilder<List<String>>(
         future: _songsFuture,
@@ -52,37 +58,54 @@ class _SongsPageState extends State<SongsPage> {
             List<String> songs = snapshot.data ?? [];
             return Column(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ToggleButton(
-                      text: 'Easy',
-                      isSelected: selectedDifficulty == 'Easy',
-                      onTap: () {
-                        setState(() {
-                          selectedDifficulty = 'Easy';
-                        });
-                      },
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(20.0, 40.0, 0.0, 0.0),
+                    child: Text(
+                      'Choose song and Difficulty:',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color: Color.fromRGBO(90, 90, 90, 1),
+                      ),
                     ),
-                    ToggleButton(
-                      text: 'Medium',
-                      isSelected: selectedDifficulty == 'Medium',
-                      onTap: () {
-                        setState(() {
-                          selectedDifficulty = 'Medium';
-                        });
-                      },
-                    ),
-                    ToggleButton(
-                      text: 'Hard',
-                      isSelected: selectedDifficulty == 'Hard',
-                      onTap: () {
-                        setState(() {
-                          selectedDifficulty = 'Hard';
-                        });
-                      },
-                    ),
-                  ],
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(20.0, 4.0, 0.0, 22.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      ToggleButton(
+                        text: 'Easy',
+                        isSelected: selectedDifficulty == 'Easy',
+                        onTap: () {
+                          setState(() {
+                            selectedDifficulty = 'Easy';
+                          });
+                        },
+                      ),
+                      ToggleButton(
+                        text: 'Medium',
+                        isSelected: selectedDifficulty == 'Medium',
+                        onTap: () {
+                          setState(() {
+                            selectedDifficulty = 'Medium';
+                          });
+                        },
+                      ),
+                      ToggleButton(
+                        text: 'Hard',
+                        isSelected: selectedDifficulty == 'Hard',
+                        onTap: () {
+                          setState(() {
+                            selectedDifficulty = 'Hard';
+                          });
+                        },
+                      ),
+                    ],
+                  ),
                 ),
                 Expanded(
                   child: ListView.builder(

@@ -40,12 +40,18 @@ class _InputFieldsState extends State<InputFields> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 40, // Set a smaller height
       width: 300,
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: widget.hasError ? Colors.red : Colors.grey,
+        gradient: LinearGradient( // Apply linear gradient color
+          colors: [
+            Color.fromRGBO(115, 115, 115, 0.16),
+            Color.fromRGBO(217, 217, 217, 0.21),
+          ],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
         ),
       ),
       child: TextField(
@@ -53,10 +59,13 @@ class _InputFieldsState extends State<InputFields> {
         onChanged: widget.onChanged,
         decoration: InputDecoration(
           hintText: widget.hintText,
-          border: InputBorder.none,
+          border: InputBorder.none, // Remove the border
+          contentPadding: EdgeInsets.symmetric(vertical: 8),
         ),
         style: TextStyle(
-          color: widget.hasError ? Colors.red : null,
+          fontSize: 16,
+          color: widget.hasError ? Colors.red : Color.fromRGBO(15, 15, 15, 1),
+          fontWeight: FontWeight.w400,
         ),
       ),
     );

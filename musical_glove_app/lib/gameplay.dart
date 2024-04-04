@@ -13,16 +13,18 @@ class GamePlayPage extends StatefulWidget {
 }
 
 class _GamePlayPageState extends State<GamePlayPage> {
-  List<int> highlightedCircles = [];
   bool showContent = false;
   String note = '';
+  int currentNoteIndex = 0;
+  List<String> songNotes = ['1', '2', '3', '4']; // Example notes, replace with actual notes
+  List<bool?> hitFeedback = List.filled(4, null); // List to store hit feedback
 
   @override
   void initState() {
     super.initState();
     // Start the countdown
     startCountdown();
-    }
+  }
 
   void receiveNotesFromESP() async {
     await BluetoothHandler.setupNotifications();
@@ -35,14 +37,63 @@ class _GamePlayPageState extends State<GamePlayPage> {
       if (note == 'END') {
         // Handle 'END' note
         print('---Ended----');
+        // Calculate and show the result
+        int correctHits = calculateCorrectHits();
+        showResult(correctHits);
+      } else {
+        // Check if the hit is correct or not
+        bool? isCorrectHit = receivedHitFeedback();
+        hitFeedback[currentNoteIndex] = isCorrectHit;
+        // Continue to next note
+        currentNoteIndex++;
       }
     });
   }
 
-  @override
-  void dispose() {
-    // Clean up resources
-    BluetoothHandler.dispose();
+  bool? receivedHitFeedback() {
+    // Example logic to determine if the hit is correct or not
+    // Replace this with the logic to get feedback from ESP
+    // For example, if the feedback is 'C' for correct and 'W' for wrong
+    String feedback = ''; // Get feedback from ESP
+    if (feedback == 'C') {
+      return true;
+    } else if (feedback == 'W') {
+      return false;
+    }
+    return null;
+  }
+
+  int calculateCorrectHits() {
+    // Compare the notes received with the expected notes and count the correct hits
+    int correctHits = 0;
+    for (int i = 0; i < songNotes.length; i++) {
+      if (i < songNotes.length && songNotes[i] == note) {
+        correctHits++;
+      }
+    }
+    return correctHits;
+  }
+
+  void showResult(int correctHits) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Well Done!'),
+          content: Text('Number of Correct Hits: $correctHits'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Navigate back to previous page
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void startCountdown() {
@@ -60,10 +111,17 @@ class _GamePlayPageState extends State<GamePlayPage> {
   }
 
   @override
+  void dispose() {
+    // Clean up resources
+    BluetoothHandler.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Circle Highlight'),
+        title: Text('Game Play'),
         backgroundColor: const Color(0xFF073050),
         foregroundColor: Colors.white,
       ),
@@ -71,18 +129,28 @@ class _GamePlayPageState extends State<GamePlayPage> {
         child: AnimatedSwitcher(
           duration: Duration(milliseconds: 500),
           child: showContent
-              ? Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 20, // adjust the spacing between circles
-            runSpacing: 20,
-            children: List.generate(
-              4,
-                  (index) => CircleWidget(
-                number: index + 1,
-                highlighted: highlightedCircles.contains(index + 1),
-              ),
-            ),
-          )
+              ? Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: List.generate(
+                        4,
+                            (index) => CircleWidget(
+                          number: index + 1,
+                          highlighted: currentNoteIndex == index,
+                          hitFeedback: hitFeedback[index],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    LinearProgressIndicator(
+                      value: (currentNoteIndex + 1) / songNotes.length,
+                      backgroundColor: Colors.grey,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                    ),
+                  ],
+                )
               : CountdownTimer(),
         ),
       ),
@@ -133,18 +201,22 @@ class _CountdownTimerState extends State<CountdownTimer> {
 class CircleWidget extends StatelessWidget {
   final int number;
   final bool highlighted;
+  final bool? hitFeedback;
 
-  const CircleWidget({Key? key, required this.number, this.highlighted = false})
-      : super(key: key);
+  const CircleWidget({Key? key, required this.number, this.highlighted = false, this.hitFeedback}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    Color circleColor = Colors.grey;
+    if (hitFeedback != null) {
+      circleColor = hitFeedback! ? Colors.green : Colors.red;
+    }
     return Container(
       width: 100,
       height: 100,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: highlighted ? Colors.green : Colors.grey,
+        color: highlighted ? Colors.blue : circleColor,
       ),
       child: Center(
         child: Text(
@@ -158,11 +230,10 @@ class CircleWidget extends StatelessWidget {
       ),
     );
   }
-
 }
 
 String MapDifficulty(String difficulty) {
-  switch(difficulty) {
+  switch (difficulty) {
     case 'Easy':
       return '1';
     case 'Medium':
