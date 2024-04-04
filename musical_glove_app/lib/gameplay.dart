@@ -13,8 +13,10 @@ class GamePlayPage extends StatefulWidget {
 }
 
 class _GamePlayPageState extends State<GamePlayPage> {
+  String formerdata = '';
   bool showContent = false;
   String note = '';
+  int correctHits = 0;
   int currentNoteIndex = 0;
   List<String> songNotes = ['1', '2', '3', '4']; // Example notes, replace with actual notes
   List<bool?> hitFeedback = List.filled(4, null); // List to store hit feedback
@@ -27,26 +29,42 @@ class _GamePlayPageState extends State<GamePlayPage> {
   }
 
   void receiveNotesFromESP() async {
+    bool firsttime = true;
+    correctHits = 0;
     await BluetoothHandler.setupNotifications();
     BluetoothHandler.getCharacteristicStream().listen((List<int> data) {
-      String receivedNote = utf8.decode(data);
-      setState(() {
-        note = receivedNote;
-      });
-      print(note);
-      if (note == 'END') {
-        // Handle 'END' note
-        print('---Ended----');
-        // Calculate and show the result
-        int correctHits = calculateCorrectHits();
-        showResult(correctHits);
-      } else {
-        // Check if the hit is correct or not
-        bool? isCorrectHit = receivedHitFeedback();
-        hitFeedback[currentNoteIndex] = isCorrectHit;
-        // Continue to next note
-        currentNoteIndex++;
+      if (!firsttime) {
+        print('data: ' + data.toString());
+        List<String> nextNotes = [];
+        String receiveddata = utf8.decode(data);
+        if (receiveddata != formerdata) {
+          if (receiveddata == 'fail' || receiveddata == 'success') {
+            // code ti highlight the circles
+            print('fail or success : ' + receiveddata);
+            if (receiveddata == 'success') {
+              correctHits++;
+            }
+          }
+          else {
+            nextNotes = receiveddata.split(",");
+            print('notes: ' + receiveddata);
+            setState(() {
+              note = nextNotes[0];
+              currentNoteIndex++;
+            });
+            print('note: ' + note);
+            if (note == 'END') {
+              // Handle 'END' note
+              print('---Ended----');
+              // Calculate and show the result
+              showResult(correctHits);
+            }
+          }
+        }
+        print('------formerdata $formerdata = receiveddata $receiveddata-----');
+        formerdata = receiveddata;
       }
+      firsttime = false;
     });
   }
 
@@ -138,7 +156,7 @@ class _GamePlayPageState extends State<GamePlayPage> {
                         4,
                             (index) => CircleWidget(
                           number: index + 1,
-                          highlighted: currentNoteIndex == index,
+                          highlighted: 2 == index,
                           hitFeedback: hitFeedback[index],
                         ),
                       ),

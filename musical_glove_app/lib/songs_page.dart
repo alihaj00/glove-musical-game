@@ -148,9 +148,10 @@ class _SongsPageState extends State<SongsPage> {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(15.0),
-                          child: Material(
-                            color: selectedSong == song ? Colors.blue.withOpacity(0.3) : Colors.grey[300],
+                          borderRadius: BorderRadius.circular(6.0),
+                          child: selectedSong != song
+                              ? Material(
+                            color: Colors.grey[300],
                             child: InkWell(
                               onTap: () {
                                 setState(() {
@@ -159,11 +160,79 @@ class _SongsPageState extends State<SongsPage> {
                               },
                               child: ListTile(
                                 title: Text(song),
-                                trailing: ElevatedButton(
-                                  onPressed: () {
-                                    BluetoothHandler.sendSongActionToESP(song, 'hear', () => setState(() {}));
-                                  },
-                                  child: const Icon(Icons.volume_up),
+                                trailing: Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Color.fromRGBO(182, 6, 6, 1.0)),
+                                  ),
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      BluetoothHandler.sendSongActionToESP(song, 'hear', () => setState(() {}));
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.transparent,
+                                      elevation: 0,
+                                      padding: EdgeInsets.zero, // Remove padding
+                                      shape: CircleBorder(), // Make the button circular
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.volume_up, color: Color.fromRGBO(182, 6, 6, 1.0)),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                              : Container(
+                              decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(6.0),
+                              gradient: const LinearGradient(
+                                colors: [
+                                  Color.fromRGBO(101, 179, 213, 1.0),
+                                  Color.fromRGBO(100, 206, 220, 1.0),
+                                  Color.fromRGBO(98, 206, 186, 1.0),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                            ),
+                            child: InkWell(
+                              onTap: () {
+                                setState(() {
+                                  selectedSong = song;
+                                });
+                              },
+                              child: ListTile(
+                                title: Text(song),
+                                trailing: Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                        color: const Color.fromRGBO(182, 6, 6, 1.0)
+                                    ),
+                                  ),
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      BluetoothHandler.sendSongActionToESP(song, 'hear', () => setState(() {}));
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.transparent,
+                                      elevation: 0,
+                                      padding: EdgeInsets.zero, // Remove padding
+                                      shape: CircleBorder(), // Make the button circular
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.volume_up, color: Color.fromRGBO(182, 6, 6, 1.0)),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),

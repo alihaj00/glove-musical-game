@@ -11,7 +11,24 @@ Function? setStateCallback;
 
 class BluetoothHandler {
   static Future<void> setupNotifications() async {
-    await characteristic!.setNotifyValue(true);
+    int attempts = 0;
+    bool success = false;
+
+    while (!success && attempts < 5) {
+      try {
+        await characteristic!.setNotifyValue(true);
+        success = true;
+      } catch (e) {
+        print('Error setting up notifications: $e');
+        attempts++;
+        await Future.delayed(Duration(milliseconds: 50)); // Wait for a short duration before retrying
+      }
+    }
+
+    if (!success) {
+      print('Failed to set up notifications after 5 attempts');
+      // Handle the failure, such as displaying an error message
+    }
   }
 
   static Stream<List<int>> getCharacteristicStream() {
