@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'ble_handler.dart';
+import 'dart:convert';
 
 class StatisticsPage extends StatefulWidget {
   const StatisticsPage({super.key});
@@ -30,13 +31,11 @@ class _StatisticsPageState extends State<StatisticsPage> {
         await BluetoothHandler.sendRequest('get_statistics', () => setState(() {}));
 
         // Listen to responses from ESP device
-        characteristic!.setNotifyValue(true);
-        characteristic!.value.listen((value) {
-          // Handle response from ESP
-          setState(() {
-            statisticsData = value[0].toString();
-            isLoading = false;
-          });
+        await Future.delayed(const Duration(seconds: 1));
+        List<int> responseBytes = await characteristic!.read();
+        setState(() {
+          statisticsData = utf8.decode(responseBytes);
+          isLoading = false;
         });
       } else {
         print('Characteristic is not available');
