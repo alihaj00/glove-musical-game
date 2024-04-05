@@ -18,7 +18,8 @@ class _GamePlayPageState extends State<GamePlayPage> {
   String note = '';
   int correctHits = 0;
   int currentNoteIndex = 0;
-  List<String> songNotes = ['1', '2', '3', '4']; // Example notes, replace with actual notes
+  List<int>? highlighted = [10];
+  List<String> nextNotes = ['']; // Example notes, replace with actual notes
   List<bool?> hitFeedback = List.filled(4, null); // List to store hit feedback
 
   @override
@@ -34,28 +35,36 @@ class _GamePlayPageState extends State<GamePlayPage> {
     await BluetoothHandler.setupNotifications();
     BluetoothHandler.getCharacteristicStream().listen((List<int> data) {
       if (!firsttime) {
-        print('data: ' + data.toString());
-        List<String> nextNotes = [];
+        List<String> nextNotes = [''];
         String receiveddata = utf8.decode(data);
         if (receiveddata != formerdata) {
+          highlighted = [-1];
           if (receiveddata == 'fail' || receiveddata == 'success') {
             // code ti highlight the circles
-            print('fail or success : ' + receiveddata);
-            if (receiveddata == 'success') {
+            bool hitValue = receiveddata == 'success' ? true : false;
+            List<int>? indexes = MapNoteIndexes(note);
+            for (var index in indexes!) {
+              print(index);
+              print(hitValue);
+              setState(() {
+                hitFeedback[index] = hitValue;
+              });
+            }
+            if (hitValue) {
               correctHits++;
             }
           }
           else {
+            hitFeedback =  List.filled(4, null);
             nextNotes = receiveddata.split(",");
-            print('notes: ' + receiveddata);
             setState(() {
               note = nextNotes[0];
+              setState(() {
+                highlighted = MapNoteIndexes(note);
+              });
               currentNoteIndex++;
             });
-            print('note: ' + note);
             if (note == 'END') {
-              // Handle 'END' note
-              print('---Ended----');
               // Calculate and show the result
               showResult(correctHits);
             }
@@ -66,30 +75,6 @@ class _GamePlayPageState extends State<GamePlayPage> {
       }
       firsttime = false;
     });
-  }
-
-  bool? receivedHitFeedback() {
-    // Example logic to determine if the hit is correct or not
-    // Replace this with the logic to get feedback from ESP
-    // For example, if the feedback is 'C' for correct and 'W' for wrong
-    String feedback = ''; // Get feedback from ESP
-    if (feedback == 'C') {
-      return true;
-    } else if (feedback == 'W') {
-      return false;
-    }
-    return null;
-  }
-
-  int calculateCorrectHits() {
-    // Compare the notes received with the expected notes and count the correct hits
-    int correctHits = 0;
-    for (int i = 0; i < songNotes.length; i++) {
-      if (i < songNotes.length && songNotes[i] == note) {
-        correctHits++;
-      }
-    }
-    return correctHits;
   }
 
   void showResult(int correctHits) {
@@ -155,15 +140,16 @@ class _GamePlayPageState extends State<GamePlayPage> {
                       children: List.generate(
                         4,
                             (index) => CircleWidget(
+                          key: UniqueKey(), // Add UniqueKey to force rebuild
                           number: index + 1,
-                          highlighted: 2 == index,
+                          highlighted: highlighted!.contains(index),
                           hitFeedback: hitFeedback[index],
                         ),
                       ),
                     ),
                     SizedBox(height: 20),
                     LinearProgressIndicator(
-                      value: (currentNoteIndex + 1) / songNotes.length,
+                      value: (currentNoteIndex + 1) / nextNotes.length,
                       backgroundColor: Colors.grey,
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
                     ),
@@ -216,29 +202,34 @@ class _CountdownTimerState extends State<CountdownTimer> {
   }
 }
 
-class CircleWidget extends StatelessWidget {
+class CircleWidget extends StatefulWidget {
   final int number;
   final bool highlighted;
   final bool? hitFeedback;
 
-  const CircleWidget({Key? key, required this.number, this.highlighted = false, this.hitFeedback}) : super(key: key);
+  CircleWidget({Key? key, required this.number, this.highlighted = false, this.hitFeedback}) : super(key: key);
 
+  @override
+  _CircleWidgetState createState() => _CircleWidgetState();
+}
+
+class _CircleWidgetState extends State<CircleWidget> {
   @override
   Widget build(BuildContext context) {
     Color circleColor = Colors.grey;
-    if (hitFeedback != null) {
-      circleColor = hitFeedback! ? Colors.green : Colors.red;
+    if (widget.hitFeedback != null) {
+      circleColor = widget.hitFeedback! ? Colors.green : Colors.red;
     }
     return Container(
       width: 100,
       height: 100,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: highlighted ? Colors.blue : circleColor,
+        color: widget.highlighted ? Colors.blue : circleColor,
       ),
       child: Center(
         child: Text(
-          '$number',
+          '${widget.number}',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -250,6 +241,7 @@ class CircleWidget extends StatelessWidget {
   }
 }
 
+
 String MapDifficulty(String difficulty) {
   switch (difficulty) {
     case 'Easy':
@@ -260,4 +252,22 @@ String MapDifficulty(String difficulty) {
       return '3';
   }
   return '';
+}
+
+List<int>? MapNoteIndexes(String note) {
+  Map<String, List<int>> NotesToIndexes = {
+    'do': [0],
+    're' : [0,1],
+    'me': [1],
+    'fa': [1,2],
+    'sol': [2],
+    'la': [2,3],
+    'si': [3],
+  };
+  for (var noteKey in NotesToIndexes.keys) {
+    if (note.contains(noteKey)) {
+      return NotesToIndexes[noteKey];
+    }
+  }
+  return [];
 }
