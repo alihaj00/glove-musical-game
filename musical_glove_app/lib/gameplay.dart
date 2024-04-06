@@ -38,7 +38,9 @@ class _GamePlayPageState extends State<GamePlayPage> {
         List<String> nextNotes = [''];
         String receiveddata = utf8.decode(data);
         if (receiveddata != formerdata) {
-          highlighted = [-1];
+          setState(() {
+            highlighted = [-1];
+          });
           if (receiveddata == 'fail' || receiveddata == 'success') {
             // code ti highlight the circles
             bool hitValue = receiveddata == 'success' ? true : false;
@@ -128,7 +130,12 @@ class _GamePlayPageState extends State<GamePlayPage> {
         backgroundColor: const Color(0xFF073050),
         foregroundColor: Colors.white,
       ),
-      body: Center(
+      body: PopScope(
+      canPop: true,
+      onPopInvoked: (bool didPop) {
+        BluetoothHandler.sendRequest('stop_game', () => setState(() {}));
+      },
+      child: Center(
         child: AnimatedSwitcher(
           duration: Duration(milliseconds: 500),
           child: showContent
@@ -158,6 +165,7 @@ class _GamePlayPageState extends State<GamePlayPage> {
               : CountdownTimer(),
         ),
       ),
+    )
     );
   }
 }

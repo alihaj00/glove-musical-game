@@ -68,23 +68,28 @@ class AddSongPageState extends State<AddSongPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 bool validNotes = validateInputsNotes(selectedNotes);
                 bool validName = validateInputsSongName(selectedSongName);
                 if(validNotes && validName) {
-                  BluetoothHandler.saveSongTOESP(selectedSongName,selectedNotes);
-                  // Save button functionality
-                  print('Song Name: $selectedSongName');
-                  print('Song Notes: $selectedNotes');
+                  String response = await BluetoothHandler.saveSongTOESP(selectedSongName,selectedNotes);
+                  if (response == 'save_ok') {
+                    // Save button functionality
+                    print('Song Name: $selectedSongName');
+                    print('Song Notes: $selectedNotes');
 
-                  // Pass back a flag indicating a new song has been added
-                  Navigator.pop(context, true);
+                    // Pass back a flag indicating a new song has been added
+                    Navigator.pop(context, true);
+                  }
+                  else {
+                    showErrorSnackbar(context, response);
+                  }
                 }
                 else if (!validName) {
                   showErrorSnackbar(context, 'Invalid song name. Make sure to type only letters and numbers, and that it is not empty.');
                 }
                 else if (!validNotes) {
-                  showErrorSnackbar(context, 'Invalid notes format. Please be rigorous about notes name separated by comma');
+                  showErrorSnackbar(context, 'Invalid notes format. The notes should not be just Pause . Also, all notes name separated by comma.');
                 }
                 // Here you can add the functionality to save the song
               },
@@ -99,6 +104,7 @@ class AddSongPageState extends State<AddSongPage> {
 
   bool validateInputsNotes(String selectedNotes) {
     String toSplit = selectedNotes;
+    bool AllPause = true;
     // Check if the string ends with a comma
     if (toSplit.endsWith(',')) {
       // Trim the comma from the end of the string
@@ -109,8 +115,11 @@ class AddSongPageState extends State<AddSongPage> {
       if (!notes.contains(splitted[i]) && splitted[i] != null) {
         return false;
       }
+      if (splitted[i] != 'Pause') {
+        AllPause = false;
+      }
     }
-    return true;
+    return !AllPause && true;
   }
 
   bool validateInputsSongName(String selectedSongName) {
