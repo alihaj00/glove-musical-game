@@ -75,7 +75,7 @@ class _SongsPageState extends State<SongsPage> {
                   child: Padding(
                     padding: EdgeInsets.fromLTRB(20.0, 40.0, 0.0, 0.0),
                     child: Text(
-                      'Choose song and Difficulty:',
+                      'Choose Song and Difficulty:',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w400,
@@ -399,7 +399,9 @@ class _SongsPageState extends State<SongsPage> {
                   BluetoothHandler.sendRequest('P-reference', () => setState(() {}));
                   Navigator.pushNamed(context, '/free trial');
                 },
-                child: const Text('Trial'),
+                child: const Text('Trial \n and Instruction',
+                  textAlign: TextAlign.center,
+                ),
               ),
             ],
           ),
@@ -411,19 +413,30 @@ class _SongsPageState extends State<SongsPage> {
         child: FloatingActionButton(
           onPressed: () {
             if (selectedSong.isNotEmpty && selectedDifficulty.isNotEmpty) {
-              // Do something when both song and difficulty are selected
-              // For example, navigate to the game screen
               final data = {
                 "selectedSong": selectedSong,
                 "selectedDifficulty": selectedDifficulty
-                // Add other data you want to pass to the gameplay page
               };
               Navigator.pushNamed(context, '/game',  arguments: data);
             } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Please select a song and difficulty. '),
-                ),
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text(''),
+                    content: const Text('Please select a song and difficulty.',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Text('OK'),
+                      ),
+                    ],
+                  );
+                },
               );
             }
           },
