@@ -1,0 +1,22 @@
+parameters :
+
+the pin number that the finger connected to :-
+const int pinky = 13;  
+const int ring= 12; 
+const int middle = 14; 
+const int indexfinger = 27;
+
+
+the pin number that the buzzer connected to :-
+const int buzzerPin=2;
+
+the frequency of the note :-
+
+const double do_=220.00 *2;
+const double re_=246.94 *2; 
+const double me_=261.63 *2; 
+const double fa_=293.66 *2; 
+const double sol_=329.63 *2;
+const double la_=349.23 *2;
+const double si_=392.00 *2;
+const double P_=0;
