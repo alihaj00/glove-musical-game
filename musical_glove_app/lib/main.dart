@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Musical Glove Game',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        fontFamily: 'TTNorms',
       ),
       initialRoute: '/',
       routes: {

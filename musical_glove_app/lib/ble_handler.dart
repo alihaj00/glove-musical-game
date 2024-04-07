@@ -8,8 +8,43 @@ BluetoothCharacteristic? characteristic;
 bool isSending = false;
 String responseMessage = ''; // Static variable for response message
 Function? setStateCallback;
+String currentUser = '';
 
 class BluetoothHandler {
+
+  static Future<void> checkESPConnection(BuildContext context) async {
+    if (esp32Device != null) {
+      // Listen to the state changes of the BluetoothDevice
+      esp32Device!.state.listen((state) {
+        if (state == BluetoothDeviceState.disconnected) {
+          // If device is disconnected, show a dialog to reconnect
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Glove Device Not Connected'),
+              content: const Text('Do you want to reconnect to the Glove device?'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context); // Close dialog
+                    // _scanForDevices(context); // Scan for devices again
+                  },
+                  child: Text('Reconnect'),
+                ),
+              ],
+            ),
+          );
+        }
+      });
+    }
+  }
+
   static Future<void> setupNotifications() async {
     int attempts = 0;
     bool success = false;

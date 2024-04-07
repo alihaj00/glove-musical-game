@@ -14,18 +14,30 @@ class _SongsPageState extends State<SongsPage> {
   String selectedDifficulty = 'Easy';
   // late Future<List<String>> _songsFuture = _getSongs();
   late Future<List<String>> _songsFuture = _getSongs();
+  List<String> adminUsers = ['anas', 'uriel', 'ali'];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Musical Glove',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w400,
-            color: Color.fromRGBO(0, 176, 143, 1),
-          ),
+        title: Row(
+          children: [
+            const Text(
+              'Musical Glove',
+              style: TextStyle(
+                fontFamily: 'LeckerliOne',
+                fontSize: 24,
+                fontWeight: FontWeight.w400,
+                color: Color.fromRGBO(0, 176, 143, 1),
+              ),
+            ),
+            SizedBox(width: 8), // Add some spacing between the title and logo
+            Image.asset(
+              'assets/glove_main_page.jpg', // Path to your logo image file
+              height: 48, // Adjust the height as needed
+              width: 48, // Adjust the width as needed
+            ),
+          ],
         ),
         backgroundColor: Colors.white,
       ),
@@ -145,6 +157,7 @@ class _SongsPageState extends State<SongsPage> {
                         );
                       }
                       String song = songs[index];
+                      bool isAdminUser = adminUsers.contains(currentUser);
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                         child: ClipRRect(
@@ -163,57 +176,60 @@ class _SongsPageState extends State<SongsPage> {
                                 trailing: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                Container(
-                                decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                  border: Border.all(color: Color.fromRGBO(182, 6, 6, 1.0)),
-                                ),
-                                  child: ElevatedButton(
-                                      onPressed: () {
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              title: Text('Confirm Delete'),
-                                              content: Text('Are you sure you want to delete this song?'),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () {
-                                                    Navigator.of(context).pop(); // Close the dialog
-                                                  },
-                                                  child: Text('Cancel'),
-                                                ),
-                                                ElevatedButton(
-                                                  onPressed: () {
-                                                    // Perform delete operation
-                                                    BluetoothHandler.sendSongActionToESP(song, 'delete', () => setState(() {}));
-                                                    setState(() {
-                                                      songs.removeAt(index); // Assuming index is the position of the song in the list
-                                                    });
-                                                    Navigator.of(context).pop(); // Close the dialog
-                                                  },
-                                                  child: Text('Delete'),
-                                                ),
-                                              ],
+                                      isAdminUser
+                                          ? Container(
+                                        // Container for the delete button
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(color: Color.fromRGBO(182, 6, 6, 1.0)),
+                                        ),
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  title: Text('Confirm Delete'),
+                                                  content: Text('Are you sure you want to delete this song?'),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.of(context).pop(); // Close the dialog
+                                                      },
+                                                      child: Text('Cancel'),
+                                                    ),
+                                                    ElevatedButton(
+                                                      onPressed: () {
+                                                        // Perform delete operation
+                                                        BluetoothHandler.sendSongActionToESP(song, 'delete', () => setState(() {}));
+                                                        setState(() {
+                                                          songs.removeAt(index); // Assuming index is the position of the song in the list
+                                                        });
+                                                        Navigator.of(context).pop(); // Close the dialog
+                                                      },
+                                                      child: Text('Delete'),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
                                             );
                                           },
-                                        );
-                                      },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.transparent,
-                                      elevation: 0,
-                                      padding: EdgeInsets.zero, // Remove padding
-                                      shape: CircleBorder(), // Make the button circular
-                                    ),
-                                    child: const Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(Icons.delete, color: Color.fromRGBO(182, 6, 6, 1.0)),
-                                      ],
-                                    )
-                                  )
-                                ),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.transparent,
+                                            elevation: 0,
+                                            padding: EdgeInsets.zero, // Remove padding
+                                            shape: CircleBorder(), // Make the button circular
+                                          ),
+                                          child: const Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Icon(Icons.delete, color: Color.fromRGBO(182, 6, 6, 1.0)),
+                                            ],
+                                          ),
+                                        ),
+                                      )
+                                    : SizedBox(), // Empty SizedBox if user is not admin
                                 SizedBox(width: 8),
                                 Container(
                                   decoration: BoxDecoration(
@@ -268,57 +284,60 @@ class _SongsPageState extends State<SongsPage> {
                                   trailing: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Container(
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              border: Border.all(color: Color.fromRGBO(182, 6, 6, 1.0)),
-                                            ),
-                                            child: ElevatedButton(
-                                                onPressed: () {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (BuildContext context) {
-                                                      return AlertDialog(
-                                                        title: Text('Confirm Delete'),
-                                                        content: Text('Are you sure you want to delete this song?'),
-                                                        actions: [
-                                                          TextButton(
-                                                            onPressed: () {
-                                                              Navigator.of(context).pop(); // Close the dialog
-                                                            },
-                                                            child: Text('Cancel'),
-                                                          ),
-                                                          ElevatedButton(
-                                                            onPressed: () {
-                                                              // Perform delete operation
-                                                              BluetoothHandler.sendSongActionToESP(song, 'delete', () => setState(() {}));
-                                                              setState(() {
-                                                                songs.removeAt(index); // Assuming index is the position of the song in the list
-                                                              });
-                                                              Navigator.of(context).pop(); // Close the dialog
-                                                            },
-                                                            child: Text('Delete'),
-                                                          ),
-                                                        ],
-                                                      );
-                                                    },
+                                        isAdminUser
+                                            ? Container(
+                                          // Container for the delete button
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(color: Color.fromRGBO(182, 6, 6, 1.0)),
+                                          ),
+                                          child: ElevatedButton(
+                                            onPressed: () {
+                                              showDialog(
+                                                context: context,
+                                                builder: (BuildContext context) {
+                                                  return AlertDialog(
+                                                    title: Text('Confirm Delete'),
+                                                    content: Text('Are you sure you want to delete this song?'),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () {
+                                                          Navigator.of(context).pop(); // Close the dialog
+                                                        },
+                                                        child: Text('Cancel'),
+                                                      ),
+                                                      ElevatedButton(
+                                                        onPressed: () {
+                                                          // Perform delete operation
+                                                          BluetoothHandler.sendSongActionToESP(song, 'delete', () => setState(() {}));
+                                                          setState(() {
+                                                            songs.removeAt(index); // Assuming index is the position of the song in the list
+                                                          });
+                                                          Navigator.of(context).pop(); // Close the dialog
+                                                        },
+                                                        child: Text('Delete'),
+                                                      ),
+                                                    ],
                                                   );
                                                 },
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor: Colors.transparent,
-                                                  elevation: 0,
-                                                  padding: EdgeInsets.zero, // Remove padding
-                                                  shape: CircleBorder(), // Make the button circular
-                                                ),
-                                                child: const Row(
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    Icon(Icons.delete, color: Color.fromRGBO(182, 6, 6, 1.0)),
-                                                  ],
-                                                )
-                                            )
-                                        ),
+                                              );
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.transparent,
+                                              elevation: 0,
+                                              padding: EdgeInsets.zero, // Remove padding
+                                              shape: CircleBorder(), // Make the button circular
+                                            ),
+                                            child: const Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Icon(Icons.delete, color: Color.fromRGBO(182, 6, 6, 1.0)),
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                        : SizedBox(), // Empty SizedBox if user is not admin
                                         SizedBox(width: 8),
                                         Container(
                                           decoration: BoxDecoration(

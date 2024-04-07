@@ -54,7 +54,16 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
+  fonts:
+    - family: LeckerliOne
+      fonts:
+        - asset: fonts/LeckerliOne.ttf
+    - family: TTNorms
+      fonts:
+        - asset: fonts/TTNorms-Regular.otf
+        - asset: fonts/TTNorms-Bold.otf
+          weight: 700
+        - asset: fonts/TTNorms-Italic.otf
   assets:
     - assets/glove_main_page.jpg
 

@@ -19,13 +19,24 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Musical Glove',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w400,
-            color: Color.fromRGBO(0, 176, 143, 1),
-          ),
+        title: Row(
+          children: [
+            const Text(
+              'Musical Glove',
+              style: TextStyle(
+                fontFamily: 'LeckerliOne',
+                fontSize: 24,
+                fontWeight: FontWeight.w400,
+                color: Color.fromRGBO(0, 176, 143, 1),
+              ),
+            ),
+            SizedBox(width: 8), // Add some spacing between the title and logo
+            Image.asset(
+              'assets/glove_main_page.jpg', // Path to your logo image file
+              height: 48, // Adjust the height as needed
+              width: 48, // Adjust the width as needed
+            ),
+          ],
         ),
         backgroundColor: Colors.white,
       ),
@@ -125,6 +136,7 @@ class _LoginPageState extends State<LoginPage> {
                       });
                       if (response == "login_ok") {
                       // if (true) {
+                        currentUser = username;
                         // Move to the main menu page
                         Navigator.pushNamed(context, '/songs');
                       } else {

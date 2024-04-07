@@ -19,6 +19,7 @@ class MainPage extends StatelessWidget {
                 fontSize: 24,
                 fontWeight: FontWeight.w400,
                 color: Colors.grey,
+                fontFamily: 'TTNorms'
               ),
             ),
             const SizedBox(height: 10),
@@ -28,6 +29,7 @@ class MainPage extends StatelessWidget {
                 fontSize: 48,
                 fontWeight: FontWeight.w400,
                 color: Color.fromRGBO(0, 176, 143, 1),
+                fontFamily: 'LeckerliOne'
               ),
             ),
             const SizedBox(height: 40),

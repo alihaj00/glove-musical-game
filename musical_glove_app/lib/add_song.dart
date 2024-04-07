@@ -19,9 +19,26 @@ class AddSongPageState extends State<AddSongPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Song'),
-        backgroundColor: const Color(0xFF073050),
-        foregroundColor: Colors.white,
+        title: Row(
+          children: [
+            const Text(
+              'Musical Glove',
+              style: TextStyle(
+                fontFamily: 'LeckerliOne',
+                fontSize: 24,
+                fontWeight: FontWeight.w400,
+                color: Color.fromRGBO(0, 176, 143, 1),
+              ),
+            ),
+            SizedBox(width: 8), // Add some spacing between the title and logo
+            Image.asset(
+              'assets/glove_main_page.jpg', // Path to your logo image file
+              height: 48, // Adjust the height as needed
+              width: 48, // Adjust the width as needed
+            ),
+          ],
+        ),
+        backgroundColor: Colors.white,
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
