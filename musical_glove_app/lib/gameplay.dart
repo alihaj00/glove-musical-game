@@ -19,8 +19,10 @@ class _GamePlayPageState extends State<GamePlayPage> {
   int correctHits = 0;
   int currentNoteIndex = 0;
   List<int>? highlighted = [10];
+  List<String> successStrings = ['perfect', 'good', 'not_bad'];
   List<String> nextNotes = ['']; // Example notes, replace with actual notes
   List<bool?> hitFeedback = List.filled(4, null); // List to store hit feedback
+  Timer? progressTimer;
 
   @override
   void initState() {
@@ -41,9 +43,10 @@ class _GamePlayPageState extends State<GamePlayPage> {
           setState(() {
             highlighted = [-1];
           });
-          if (receiveddata == 'fail' || receiveddata == 'success') {
+          if (receiveddata == 'fail' || successStrings.contains(receiveddata)) {
             // code ti highlight the circles
-            bool hitValue = receiveddata == 'success' ? true : false;
+            print(receiveddata);
+            bool hitValue = successStrings.contains(receiveddata) ? true : false;
             List<int>? indexes = MapNoteIndexes(note);
             for (var index in indexes!) {
               print(index);
@@ -57,6 +60,7 @@ class _GamePlayPageState extends State<GamePlayPage> {
             }
           }
           else {
+            currentNoteIndex = 0;
             hitFeedback =  List.filled(4, null);
             nextNotes = receiveddata.split(",");
             setState(() {
@@ -64,7 +68,6 @@ class _GamePlayPageState extends State<GamePlayPage> {
               setState(() {
                 highlighted = MapNoteIndexes(note);
               });
-              currentNoteIndex++;
             });
             if (note == 'END') {
               // Calculate and show the result
@@ -111,7 +114,33 @@ class _GamePlayPageState extends State<GamePlayPage> {
         BluetoothHandler.sendSongActionToESP(widget.data['selectedSong'], 'play_${MapDifficulty(widget.data['selectedDifficulty'])}', () => setState(() {}));
         // Now, initiate receiving notes from ESP
         receiveNotesFromESP();
+        // Start the progress timer
+        startProgressTimer();
       });
+    });
+  }
+
+  void startProgressTimer() {
+    int duration = 0;
+    switch(widget.data['selectedDifficulty']) {
+      case 'Easy':
+        duration = 1500;
+        break;
+      case 'Medium':
+        duration = 1000;
+        break;
+      case 'Hard':
+        duration = 500;
+        break;
+    }
+    progressTimer = Timer.periodic(Duration(milliseconds: duration), (timer) {
+      if (currentNoteIndex < nextNotes.length) {
+        setState(() {
+          currentNoteIndex++; // Increase the currentNoteIndex
+        });
+      } else {
+        timer.cancel(); // Stop the timer when all notes are displayed
+      }
     });
   }
 
@@ -131,41 +160,69 @@ class _GamePlayPageState extends State<GamePlayPage> {
         foregroundColor: Colors.white,
       ),
       body: PopScope(
-      canPop: true,
-      onPopInvoked: (bool didPop) {
-        BluetoothHandler.sendRequest('stop_game', () => setState(() {}));
-      },
-      child: Center(
-        child: AnimatedSwitcher(
-          duration: Duration(milliseconds: 500),
-          child: showContent
-              ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: List.generate(
-                        4,
-                            (index) => CircleWidget(
-                          key: UniqueKey(), // Add UniqueKey to force rebuild
-                          number: index + 1,
-                          highlighted: highlighted!.contains(index),
-                          hitFeedback: hitFeedback[index],
-                        ),
-                      ),
+        canPop: true,
+        onPopInvoked: (bool didPop) {
+          BluetoothHandler.sendRequest('stop_game', () => setState(() {}));
+        },
+        child: Center(
+          child: AnimatedSwitcher(
+            duration: Duration(milliseconds: 500),
+            child: showContent
+                ? Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: List.generate(
+                    4,
+                        (index) => CircleWidget(
+                      key: UniqueKey(), // Add UniqueKey to force rebuild
+                      number: index + 1,
+                      highlighted: highlighted!.contains(index),
+                      hitFeedback: hitFeedback[index],
                     ),
-                    SizedBox(height: 20),
+                  ),
+                ),
+                SizedBox(height: 20),
+                Stack(
+                  children: [
                     LinearProgressIndicator(
                       value: (currentNoteIndex + 1) / nextNotes.length,
                       backgroundColor: Colors.grey,
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
                     ),
+                    ...List.generate(
+                      nextNotes.length,
+                          (index) {
+                        final double circlePosition =
+                            ((index + 1) / nextNotes.length) - 0.025; // Adjust circle position for centering
+                        return Positioned(
+                          left: circlePosition * MediaQuery.of(context).size.width,
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                            ),
+                            child: Center(
+                              child: Text(
+                                '${index + 1}', // Display index + 1 (1-based)
+                                style: TextStyle(fontSize: 16, color: Colors.black),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ],
-                )
-              : CountdownTimer(),
+                ),
+              ],
+            )
+                : CountdownTimer(),
+          ),
         ),
       ),
-    )
     );
   }
 }

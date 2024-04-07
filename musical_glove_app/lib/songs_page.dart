@@ -361,10 +361,10 @@ class _SongsPageState extends State<SongsPage> {
         },
       ),
       bottomNavigationBar: BottomAppBar(
-        elevation: 8, // Add elevation for better visual separation
+        elevation: 8,
+        color: Color.fromRGBO(240, 255, 251, 0.63),
         child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 16.0),
-          height: kBottomNavigationBarHeight + 32.0, // Add extra space for button
+          height: kBottomNavigationBarHeight,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -374,33 +374,6 @@ class _SongsPageState extends State<SongsPage> {
                   Navigator.pushNamed(context, '/statistics');
                 },
                 child: Text('Statistics'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  if (selectedSong.isNotEmpty && selectedDifficulty.isNotEmpty) {
-                    // Do something when both song and difficulty are selected
-                    // For example, navigate to the game screen
-                    final data = {
-                      "selectedSong": selectedSong,
-                      "selectedDifficulty": selectedDifficulty
-                      // Add other data you want to pass to the gameplay page
-                    };
-                    Navigator.pushNamed(context, '/game',  arguments: data);
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Please select a song and difficulty.'),
-                      ),
-                    );
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0), // Adjust the button size
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(100.0), // Make button round
-                  ),
-                ),
-                child: Text('Start Play'),
               ),
               TextButton(
                 onPressed: () {
@@ -412,6 +385,42 @@ class _SongsPageState extends State<SongsPage> {
           ),
         ),
       ),
+      floatingActionButton: SizedBox(
+        width: 120,
+        height: 120,
+        child: FloatingActionButton(
+          onPressed: () {
+            if (selectedSong.isNotEmpty && selectedDifficulty.isNotEmpty) {
+              // Do something when both song and difficulty are selected
+              // For example, navigate to the game screen
+              final data = {
+                "selectedSong": selectedSong,
+                "selectedDifficulty": selectedDifficulty
+                // Add other data you want to pass to the gameplay page
+              };
+              Navigator.pushNamed(context, '/game',  arguments: data);
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Please select a song and difficulty. '),
+                ),
+              );
+            }
+          },
+          backgroundColor: Color.fromRGBO(255, 255, 255, 1.0),
+          elevation: 8.0,
+          shape: CircleBorder(),
+          child: const Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(Icons.play_arrow, size: 40),
+              SizedBox(height: 8.0),
+              Text('Play', style: TextStyle(fontSize: 16)),
+            ],
+          ),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 
