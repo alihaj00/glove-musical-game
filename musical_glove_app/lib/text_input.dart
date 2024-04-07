@@ -4,14 +4,16 @@ class InputFields extends StatefulWidget {
   final String hintText;
   final Function(String) onChanged;
   final bool hasError;
-  final TextEditingController? controller; // Make the controller optional
+  final TextEditingController? controller;
+  final bool obscureText; // Add this property
 
   const InputFields({
     Key? key,
     required this.hintText,
     required this.onChanged,
     this.hasError = false,
-    this.controller, // Provide default value of null
+    this.controller,
+    this.obscureText = false, // Provide default value
   }) : super(key: key);
 
   @override
@@ -24,13 +26,11 @@ class _InputFieldsState extends State<InputFields> {
   @override
   void initState() {
     super.initState();
-    // Initialize the controller if it's provided, otherwise create a new one
     _controller = widget.controller ?? TextEditingController();
   }
 
   @override
   void dispose() {
-    // Dispose the controller if it's not null
     if (widget.controller == null) {
       _controller.dispose();
     }
@@ -40,12 +40,12 @@ class _InputFieldsState extends State<InputFields> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 40, // Set a smaller height
+      height: 40,
       width: 300,
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        gradient: LinearGradient( // Apply linear gradient color
+        gradient: LinearGradient(
           colors: [
             Color.fromRGBO(115, 115, 115, 0.16),
             Color.fromRGBO(217, 217, 217, 0.21),
@@ -57,9 +57,10 @@ class _InputFieldsState extends State<InputFields> {
       child: TextField(
         controller: _controller,
         onChanged: widget.onChanged,
+        obscureText: widget.obscureText, // Use obscureText property
         decoration: InputDecoration(
           hintText: widget.hintText,
-          border: InputBorder.none, // Remove the border
+          border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(vertical: 8),
         ),
         style: TextStyle(

@@ -107,6 +107,7 @@ class _LoginPageState extends State<LoginPage> {
                   password = value;
                 });
               },
+              obscureText: true
             ),
             if (errorMessage.isNotEmpty)
               Padding(

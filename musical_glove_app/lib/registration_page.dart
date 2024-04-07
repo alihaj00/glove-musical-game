@@ -107,6 +107,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   password = value;
                 });
               },
+              obscureText: true,
             ),
             if (errorMessage.isNotEmpty)
               Padding(
