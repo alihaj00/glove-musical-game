@@ -14,6 +14,7 @@ class GamePlayPage extends StatefulWidget {
 
 class _GamePlayPageState extends State<GamePlayPage> {
   String formerdata = '';
+  String userPrint = '';
   bool showContent = false;
   String note = '';
   int correctHits = 0;
@@ -60,7 +61,14 @@ class _GamePlayPageState extends State<GamePlayPage> {
             if (hitValue) {
               correctHits++;
             }
-          } else {
+            setState(() {
+              userPrint = MapUserPrint(receiveddata);
+            });
+          } else if (receiveddata == 'not_bad') {
+            setState(() {
+              userPrint = MapUserPrint(receiveddata);
+            });
+          }else {
             hitFeedback = List.filled(4, null);
             nextNotes = receiveddata.split(",");
             setState(() {
@@ -182,38 +190,63 @@ class _GamePlayPageState extends State<GamePlayPage> {
         ),
         backgroundColor: Colors.white,
       ),
-      body: Column(
+      body: Stack(
+        alignment: Alignment.topCenter,
         children: [
-          LinearProgressIndicator(value: progress),
-          Expanded(
-            child: Center(
-              child: AnimatedSwitcher(
-                duration: Duration(milliseconds: 500),
-                child: showContent
-                    ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: List.generate(
-                        4,
-                            (index) =>
-                            CircleWidget(
+          Column(
+            children: [
+              LinearProgressIndicator(value: progress),
+              Expanded(
+                child: Center(
+                  child: AnimatedSwitcher(
+                    duration: Duration(milliseconds: 500),
+                    child: showContent
+                        ? Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(height: 40),
+                        Text(
+                          userPrint,
+                          style: const TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: List.generate(
+                            4,
+                                (index) => CircleWidget(
                               key: UniqueKey(),
                               // Add UniqueKey to force rebuild
                               number: index + 1,
                               highlighted: highlighted!.contains(index),
                               hitFeedback: hitFeedback[index],
                             ),
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                  ],
-                )
-                    : CountdownTimer(),
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                      ],
+                    )
+                        : CountdownTimer(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (showContent)
+            Positioned(
+              left: 0,
+              bottom: 0,
+              child: Image.asset(
+                'assets/glove_gameplay.jpg',
+                width: MediaQuery.of(context).size.width * 0.9, // Set width to screen width
+                height: 600, // Adjust the height as needed
+                fit: BoxFit.fill, // Ensure the image fills the width of the screen
               ),
             ),
-          ),
         ],
       ),
     );
@@ -280,8 +313,8 @@ class _CircleWidgetState extends State<CircleWidget> {
       circleColor = widget.hitFeedback! ? Colors.green : Colors.red;
     }
     return Container(
-      width: 100,
-      height: 100,
+      width: 60,
+      height: 60,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: widget.highlighted ? Colors.blue : circleColor,
@@ -289,7 +322,7 @@ class _CircleWidgetState extends State<CircleWidget> {
       child: Center(
         child: Text(
           '${widget.number}',
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -328,4 +361,20 @@ List<int>? MapNoteIndexes(String note) {
     }
   }
   return [];
+}
+
+String MapUserPrint(String ESPReponse) {
+  switch (ESPReponse) {
+    case 'perfect':
+      return 'Perfect!';
+    case 'good':
+      return 'Good!';
+    case 'not_bad':
+      return 'Not Bad';
+    case 'fail':
+      return "Next time you'll get it!";
+    case 'not_time':
+      return "Patience! Too late or too early...";
+  }
+  return '';
 }
