@@ -397,6 +397,7 @@ class _SongsPageState extends State<SongsPage> {
               TextButton(
                 onPressed: () {
                   BluetoothHandler.sendRequest('P-reference', () => setState(() {}));
+                  Navigator.pushNamed(context, '/free trial');
                 },
                 child: const Text('Trial'),
               ),
