@@ -140,10 +140,14 @@ class _LoginPageState extends State<LoginPage> {
                         currentUser = username;
                         // Move to the main menu page
                         Navigator.pushNamed(context, '/songs');
+                      } else if (response.isEmpty) {
+                        setState(() {
+                          errorMessage = 'Make sure you connected to device';
+                        });
                       } else {
                         // Show error message from server
                         setState(() {
-                          errorMessage = response.isNotEmpty ? response : 'Invalid username or password';
+                          errorMessage = response;
                         });
                       }
                     } else {

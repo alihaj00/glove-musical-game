@@ -109,7 +109,7 @@ class MainPage extends StatelessWidget {
                 onPressed: () {
                   Navigator.pushNamed(context, '/BT connection');
                 },
-                child: const Text('BT connection'),
+                child: const Text('Connect To Glove'),
               ),
             ),
           ],

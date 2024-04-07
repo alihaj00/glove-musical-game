@@ -17,7 +17,7 @@ class _GamePlayPageState extends State<GamePlayPage> {
   String userPrint = '';
   bool showContent = false;
   String note = '';
-  int correctHits = 0;
+  int score = 0;
   List<int>? highlighted = [10];
   List<String> successStrings = ['perfect', 'good', 'not_bad'];
   List<String> nextNotes = ['']; // Example notes, replace with actual notes
@@ -34,9 +34,9 @@ class _GamePlayPageState extends State<GamePlayPage> {
 
   void receiveNotesFromESP() async {
     bool firsttime = true;
-    correctHits = 0;
+    score = 0;
     await BluetoothHandler.setupNotifications();
-    BluetoothHandler.getCharacteristicStream().listen((List<int> data) {
+    BluetoothHandler.getCharacteristicStream().listen((List<int> data) async {
       if (!firsttime) {
         List<String> nextNotes = [''];
         String receiveddata = utf8.decode(data);
@@ -44,22 +44,20 @@ class _GamePlayPageState extends State<GamePlayPage> {
           setState(() {
             highlighted = [-1];
           });
-          if (receiveddata == 'fail' || successStrings.contains(receiveddata)) {
+          if (receiveddata == 'fail' ||
+              successStrings.contains(receiveddata)) {
             // code to highlight the circles
-            print(receiveddata);
             bool hitValue = successStrings.contains(receiveddata)
                 ? true
                 : false;
             List<int>? indexes = MapNoteIndexes(note);
             for (var index in indexes!) {
-              print(index);
-              print(hitValue);
               setState(() {
                 hitFeedback[index] = hitValue;
               });
             }
             if (hitValue) {
-              correctHits++;
+              score += MapPrintToPoints(receiveddata);
             }
             setState(() {
               userPrint = MapUserPrint(receiveddata);
@@ -68,7 +66,7 @@ class _GamePlayPageState extends State<GamePlayPage> {
             setState(() {
               userPrint = MapUserPrint(receiveddata);
             });
-          }else {
+          } else {
             hitFeedback = List.filled(4, null);
             nextNotes = receiveddata.split(",");
             setState(() {
@@ -79,7 +77,7 @@ class _GamePlayPageState extends State<GamePlayPage> {
             });
             if (note == 'END') {
               // Calculate and show the result
-              showResult(correctHits);
+              showResult(score);
             } else {
               // Restart progress timer when new notes are received
               progress = 0.0;
@@ -88,7 +86,6 @@ class _GamePlayPageState extends State<GamePlayPage> {
             }
           }
         }
-        print('------formerdata $formerdata = receiveddata $receiveddata-----');
         formerdata = receiveddata;
       }
       firsttime = false;
@@ -96,13 +93,13 @@ class _GamePlayPageState extends State<GamePlayPage> {
   }
 
 
-  void showResult(int correctHits) {
+  void showResult(int score) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Well Done!'),
-          content: Text('Number of Correct Hits: $correctHits'),
+          title: const Text('Well Done!'),
+          content: Text('Your score is: $score'),
           actions: [
             TextButton(
               onPressed: () {
@@ -121,7 +118,7 @@ class _GamePlayPageState extends State<GamePlayPage> {
   void startCountdown() {
     // Start the countdown
     Timer(Duration(seconds: 3), () {
-      setState(() {
+      setState(() async {
         showContent = true; // Show content after countdown
         // Here you can apply BThandler.sendSongToESP
         BluetoothHandler.sendSongActionToESP(widget.data['selectedSong'],
@@ -137,7 +134,7 @@ class _GamePlayPageState extends State<GamePlayPage> {
 
   void startProgressTimer() {
     // Determine progress duration based on difficulty
-    double progressDuration = 2.0; // Default duration for easy difficulty
+    double progressDuration = 3.0; // Default duration for easy difficulty
     switch (widget.data['selectedDifficulty']) {
       case 'Medium':
         progressDuration = 1.5;
@@ -180,7 +177,7 @@ class _GamePlayPageState extends State<GamePlayPage> {
                 color: Color.fromRGBO(0, 176, 143, 1),
               ),
             ),
-            SizedBox(width: 8), // Add some spacing between the title and logo
+            const SizedBox(width: 8), // Add some spacing between the title and logo
             Image.asset(
               'assets/glove_main_page.jpg', // Path to your logo image file
               height: 48, // Adjust the height as needed
@@ -377,4 +374,16 @@ String MapUserPrint(String ESPReponse) {
       return "Patience! Too late or too early...";
   }
   return '';
+}
+
+int MapPrintToPoints(String ESPReponse) {
+  switch (ESPReponse) {
+    case 'perfect':
+      return 150;
+    case 'good':
+      return 100;
+    case 'not_bad':
+      return 50;
+  }
+  return 0;
 }
