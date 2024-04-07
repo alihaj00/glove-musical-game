@@ -14,6 +14,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
   late String currentSongName;
   late String currentDifficulty;
   bool isLoading = true;
+  int selectedSongIndex = 0; // New variable to keep track of the selected song index
 
   @override
   void initState() {
@@ -41,7 +42,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
 
         setState(() {
           statisticsData = json.decode(utf8.decode(responseBytes));
-          currentSongName = statisticsData.keys.first;
+          currentSongName = statisticsData.keys.elementAt(selectedSongIndex); // Update currentSongName based on selected index
           isLoading = false;
         });
       } else {
@@ -76,8 +77,6 @@ class _StatisticsPageState extends State<StatisticsPage> {
       return userList;
     }
 
-
-
     List<Map<String, dynamic>> users = getUsers();
 
     return Scaffold(
@@ -108,46 +107,117 @@ class _StatisticsPageState extends State<StatisticsPage> {
             ? CircularProgressIndicator()
             : Column(
           children: [
-            DropdownButton<String>(
-              value: currentSongName,
-              onChanged: (String? newValue) {
-                setState(() {
-                  currentSongName = newValue!;
-                });
-              },
-              items: songNames.map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
+            // Selector for song name with arrows
+            const SizedBox(height: 20),
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.stars,
+                  color: Color.fromRGBO(105, 105, 105, 1),
+                ),
+                SizedBox(width: 8), // Add some spacing
+                Text(
+                  'statistics',
+                  style: TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.w400,
+                      color: Color.fromRGBO(105, 105, 105, 1),
+                      fontFamily: 'LeckerliOne'
+                  ),
+                ),
+              ],
             ),
-            DropdownButton<String>(
-              value: currentDifficulty,
-              onChanged: (String? newValue) {
-                setState(() {
-                  currentDifficulty = newValue!;
-                });
-              },
-              items: difficultyLevels.map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.arrow_back),
+                  onPressed: () {
+                    setState(() {
+                      selectedSongIndex = (selectedSongIndex - 1) % songNames.length;
+                      if (selectedSongIndex < 0) selectedSongIndex = songNames.length - 1;
+                      currentSongName = songNames[selectedSongIndex];
+                    });
+                  },
+                ),
+                Text(
+                  currentSongName,
+                  style: TextStyle(fontSize: 18),
+                ),
+                IconButton(
+                  icon: Icon(Icons.arrow_forward),
+                  onPressed: () {
+                    setState(() {
+                      selectedSongIndex = (selectedSongIndex + 1) % songNames.length;
+                      currentSongName = songNames[selectedSongIndex];
+                    });
+                  },
+                ),
+              ],
             ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: users.length,
-                itemBuilder: (context, index) {
-                  return Card(
-                    child: ListTile(
-                      leading: Text('${index + 1}'), // Rank
-                      title: Text(users[index]['username']),
-                      trailing: Text('${users[index]['high_score']}'),
+            const SizedBox(height: 20),
+            // Custom toggle buttons for difficulty selection
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: difficultyLevels.map((difficulty) {
+                bool isSelected = currentDifficulty == difficulty;
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      currentDifficulty = difficulty;
+                    });
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      difficulty,
+                      style: TextStyle(
+                        fontSize: isSelected ? 18 : 16, // Increase font size for selected difficulty
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal, // Bold text for selected difficulty
+                        color: isSelected ? Colors.black : Colors.grey, // Change color for selected difficulty
+                      ),
                     ),
-                  );
-                },
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 20),
+            Container(
+              width: MediaQuery.of(context).size.width * 0.8, // Adjust the width as needed
+              height: MediaQuery.of(context).size.height * 0.4, // Adjust the height as needed
+              child: SingleChildScrollView(
+                child: ListView.builder(
+                  shrinkWrap: true, // Ensure ListView takes only the space it needs
+                  itemCount: users.length,
+                  itemBuilder: (context, index) {
+                    return Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0), // Adjust the radius as needed
+                      ),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15.0), // Match the card's border radius
+                          gradient: currentUser == users[index]['username']
+                              ? const LinearGradient(
+                            colors: [
+                              Color.fromRGBO(101, 179, 213, 1.0),
+                              Color.fromRGBO(100, 206, 220, 1.0),
+                              Color.fromRGBO(98, 206, 186, 1.0),
+                            ],
+                          )
+                              : null, // No gradient for other users
+                        ),
+                        child: ListTile(
+                          leading: Text('${index + 1}'), // Rank
+                          title: Text(users[index]['username']),
+                          trailing: Text('${users[index]['high_score']}'),
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
           ],
