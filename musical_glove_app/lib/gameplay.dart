@@ -24,6 +24,7 @@ class _GamePlayPageState extends State<GamePlayPage> {
   List<bool?> hitFeedback = List.filled(4, null); // List to store hit feedback
   double progress = 0.0;
   Timer? progressTimer;
+  StreamSubscription<List<int>>? notificationSubscription;
 
   @override
   void initState() {
@@ -36,8 +37,10 @@ class _GamePlayPageState extends State<GamePlayPage> {
     bool firsttime = true;
     score = 0;
     await BluetoothHandler.setupNotifications();
-    BluetoothHandler.getCharacteristicStream().listen((List<int> data) async {
-      if (!firsttime) {
+    notificationSubscription = BluetoothHandler.getCharacteristicStream().listen((List<int> data) {
+      if (!firsttime ||
+          MapNoteIndexes(utf8.decode(data).split(",")[0])!.isNotEmpty) {
+        firsttime = false;
         List<String> nextNotes = [''];
         String receiveddata = utf8.decode(data);
         if (receiveddata != formerdata) {
@@ -62,13 +65,14 @@ class _GamePlayPageState extends State<GamePlayPage> {
             setState(() {
               userPrint = MapUserPrint(receiveddata);
             });
-          } else if (receiveddata == 'not_bad') {
+          } else if (receiveddata == 'not_time') {
             setState(() {
               userPrint = MapUserPrint(receiveddata);
             });
           } else {
             hitFeedback = List.filled(4, null);
             nextNotes = receiveddata.split(",");
+            print("note " + nextNotes[0]);
             setState(() {
               note = nextNotes[0];
               setState(() {
@@ -118,7 +122,7 @@ class _GamePlayPageState extends State<GamePlayPage> {
   void startCountdown() {
     // Start the countdown
     Timer(Duration(seconds: 3), () {
-      setState(() async {
+      setState(() {
         showContent = true; // Show content after countdown
         // Here you can apply BThandler.sendSongToESP
         BluetoothHandler.sendSongActionToESP(widget.data['selectedSong'],
@@ -156,6 +160,7 @@ class _GamePlayPageState extends State<GamePlayPage> {
 
   @override
   void dispose() {
+    notificationSubscription?.cancel();
     // Clean up resources
     BluetoothHandler.dispose();
     progressTimer?.cancel(); // Cancel progress timer
@@ -371,7 +376,7 @@ String MapUserPrint(String ESPReponse) {
     case 'fail':
       return "Next time you'll get it!";
     case 'not_time':
-      return "Patience! Too late or too early...";
+      return "wait! you hit too early";
   }
   return '';
 }
