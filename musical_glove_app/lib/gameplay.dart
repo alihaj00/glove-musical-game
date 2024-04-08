@@ -192,7 +192,12 @@ class _GamePlayPageState extends State<GamePlayPage> {
         ),
         backgroundColor: Colors.white,
       ),
-      body: Stack(
+      body: PopScope(
+      canPop: true,
+      onPopInvoked: (bool didPop) {
+        BluetoothHandler.sendRequest('stop_game', () => setState(() {}));
+      },
+      child: Stack(
         alignment: Alignment.topCenter,
         children: [
           Column(
@@ -250,6 +255,7 @@ class _GamePlayPageState extends State<GamePlayPage> {
               ),
             ),
         ],
+      ),
       ),
     );
   }
