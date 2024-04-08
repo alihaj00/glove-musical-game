@@ -1,5 +1,5 @@
 # Musical Glove #
-May the Glove be with you! ![image](https://github.com/alihaj00/glove-musical-game/assets/51716650/64909adf-9722-44e9-83c2-4d6fa4b950b6)
+May the Glove be with you!
 
 Musical Glove is a project that helps patients rehabilitate their hands with basic motions - touching with the thumb other finger(s).
 The project gamificy the rehabilitation tasks, making it fun and creative to do the exercise. 
