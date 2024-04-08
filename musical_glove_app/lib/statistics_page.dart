@@ -68,7 +68,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
           statisticsData[currentSongName].containsKey(currentDifficulty)) {
         var userData = statisticsData[currentSongName][currentDifficulty];
         userData.forEach((username, highScore) {
-          if (username!= 'song_played') {
+          if (username!= 'song_played' && username != '') {
             userList.add({
               'username': username,
               'high_score': highScore,
@@ -76,7 +76,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
           }
         });
       }
-      userList.sort((a, b) => b['high_score'].compareTo(a['high_score']));
+      userList.sort((a, b) => int.parse(b['high_score'].toString()).compareTo(int.parse(a['high_score'].toString())));
       return userList;
     }
 
