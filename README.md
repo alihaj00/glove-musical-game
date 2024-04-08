@@ -17,6 +17,15 @@ help move forward with the rehabilitation tasks, and even add new challenges (so
 
 ## Libraries ##
 ### ESP32: ###
+-  EEPROM.h - version 2.1 
+-  SPIFFS.h - Version 2.0
+-  BLEDevice.h - Created on: Mar 16, 2017
+-  BLEServer.h - Created on: Apr 16, 2017
+-  BLEUtils.h - Created on: Mar 25, 2017
+-  BLE2902.h - Created on: Jun 25, 2017
+-  FS.h - version 2.1
+-  Preferences.h - Version 2.0
+-  ArduinoJson.h
 
 ### Flutter: ###
 -   flutter_blue: 0.8.0
